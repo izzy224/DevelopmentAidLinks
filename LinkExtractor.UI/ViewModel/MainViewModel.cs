@@ -7,40 +7,21 @@ namespace LinkExtractor.UI.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
-        private IEmployeeDataService _employeeDataService;
-        private Employee _selectedEmployee;
 
 
-        public MainViewModel(IEmployeeDataService employeeDataService)
+        public MainViewModel(INavigationViewModel navigationViewModel, IEmployeeDetailViewModel employeeDetailViewModel)
         {
-            Employees = new ObservableCollection<Employee>();
-            _employeeDataService = employeeDataService;
+            NavigationViewModel = navigationViewModel;
+            EmployeeDetailViewModel = employeeDetailViewModel;
         }
 
         public async Task LoadAsync()
         {
-            var employees = await _employeeDataService.GetAllAsync();
-            Employees.Clear();
-            foreach (var employee in employees)
-            {
-                Employees.Add(employee);
-            }
+            await NavigationViewModel.LoadAsync();
         }
 
-        public ObservableCollection<Employee> Employees { get; set; }
-
-
-        public Employee SelectedEmployee
-        {
-            get { return _selectedEmployee; }
-            set
-            {
-                _selectedEmployee = value;
-                OnPropertyChanged();
-            }
-        }
-
-
+        public INavigationViewModel NavigationViewModel { get; }
+        public IEmployeeDetailViewModel EmployeeDetailViewModel { get; }
     }
 }
 

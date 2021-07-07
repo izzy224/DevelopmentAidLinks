@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 
 namespace LinkExtractor.UI.DataServices
 {
-    public interface IEmployeeDataService
+    public interface IEmployeeLookupDataService
     {
-        Task<Employee> GetByIdAsync(int employeeId);
-        Task SaveAsync(Employee employee);
+        Task<IEnumerable<LookupItem>> GetEmployeeLookupAsync();
     }
 }

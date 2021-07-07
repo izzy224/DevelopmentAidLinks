@@ -17,11 +17,21 @@ namespace LinkExtractor.UI.DataServices
             _contextCreator = contextCreator;
         }
 
-        public async Task<List<Employee>> GetAllAsync()
+        public async Task<Employee> GetByIdAsync(int employeeId)
         {
             using(var context = _contextCreator())
             {
-                return await context.Employees.AsNoTracking().ToListAsync();
+                return await context.Employees.AsNoTracking().SingleAsync(e => e.Id == employeeId);
+            }
+        }
+
+        public async Task SaveAsync(Employee employee)
+        {
+            using(var context = _contextCreator())
+            {
+                context.Employees.Add(employee);
+                context.Entry(employee).State = EntityState.Modified;
+                await context.SaveChangesAsync();
             }
         }
 

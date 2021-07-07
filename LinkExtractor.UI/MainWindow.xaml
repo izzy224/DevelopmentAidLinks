@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LinkExtractor.UI"
+        xmlns:view="clr-namespace:LinkExtractor.UI.View"
         mc:Ignorable="d"
         Title="Link Extractor" Height="450" Width="800">
     <Grid>
@@ -11,30 +12,9 @@
             <ColumnDefinition Width="200"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <ListView ItemsSource="{Binding Employees}" 
-                  SelectedItem = "{Binding SelectedEmployee, Mode=TwoWay}"
-                  DisplayMemberPath="Name">
-        </ListView>
+        <view:NavigationView DataContext="{Binding NavigationViewModel}" />
+        <view:EmployeeDetailView Grid.Column="1" DataContext="{Binding EmployeeDetailViewModel}"/>
 
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            
-            <Label Content="Name" Margin="10 10 10 0"></Label>
-            <TextBox Grid.Row="1" Text="{Binding SelectedEmployee.Name,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10"></TextBox>
-
-            <Label Grid.Row="2" Content="Surname" Margin="10 0 10 0"></Label>
-            <TextBox Grid.Row="3" Text="{Binding SelectedEmployee.Surname,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10"></TextBox>
-
-            <Label Grid.Row="4" Content="Email" Margin="10 0 10 0"></Label>
-            <TextBox Grid.Row="5" Text="{Binding SelectedEmployee.Email,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10 0 10 10"></TextBox>
-        </Grid>
+        
     </Grid>
 </Window>
