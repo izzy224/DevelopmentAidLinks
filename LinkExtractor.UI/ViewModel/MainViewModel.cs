@@ -1,6 +1,7 @@
 ﻿using LinkExtractor.Models;
 using LinkExtractor.UI.DataServices;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace LinkExtractor.UI.ViewModel
 {
@@ -16,9 +17,9 @@ namespace LinkExtractor.UI.ViewModel
             _employeeDataService = employeeDataService;
         }
 
-        public void Load()
+        public async Task LoadAsync()
         {
-            var employees = _employeeDataService.GetAll();
+            var employees = await _employeeDataService.GetAllAsync();
             Employees.Clear();
             foreach (var employee in employees)
             {

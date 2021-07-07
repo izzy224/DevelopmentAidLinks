@@ -1,18 +1,36 @@
-﻿using LinkExtractor.Models;
+﻿using LinkExtractor.DAL;
+using LinkExtractor.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace LinkExtractor.UI.DataServices
 {
     public class EmployeeDataService : IEmployeeDataService
     {
-        public IEnumerable<Employee> GetAll()
+        private Func<LinkExtractorDbContext> _contextCreator;
+
+        public EmployeeDataService(Func<LinkExtractorDbContext> contextCreator)
         {
-            return new List<Employee>()
-            {
-                new Employee() {Name = "Negura", Surname = "Constantin", Email = "example@developmentaid.org"},
-                new Employee() {Name = "Bajora", Surname = "Vasile", Email = "vasea.bajora@gmail.com"},
-                new Employee() {Name = "Spinu", Surname = "Anatol", Email = "example2@developmentaid.org"}
-            };
+            _contextCreator = contextCreator;
         }
+
+        public async Task<List<Employee>> GetAllAsync()
+        {
+            using(var context = _contextCreator())
+            {
+                return await context.Employees.AsNoTracking().ToListAsync();
+            }
+        }
+
+        //public IEnumerable<Employee> GetAll()
+        //{
+        //    using(var context = _contextCreator())
+        //    {
+        //        return context.Employees.AsNoTracking().ToList();
+        //    }
+        //}
     }
 }
