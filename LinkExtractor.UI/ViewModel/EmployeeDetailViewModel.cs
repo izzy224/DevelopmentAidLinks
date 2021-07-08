@@ -1,6 +1,7 @@
 ﻿using LinkExtractor.Models;
 using LinkExtractor.UI.DataServices;
 using LinkExtractor.UI.Events;
+using LinkExtractor.UI.Wrapper;
 using Prism.Commands;
 using Prism.Events;
 using System;
@@ -16,6 +17,7 @@ namespace LinkExtractor.UI.ViewModel
     {
         private IEmployeeDataService _dataService;
         private IEventAggregator _eventAggregator;
+        private EmployeeWrapper _employee;
 
         public EmployeeDetailViewModel(IEmployeeDataService dataService,
             IEventAggregator eventAggregator)
@@ -28,9 +30,36 @@ namespace LinkExtractor.UI.ViewModel
             SaveCommand = new DelegateCommand(OnSaveExecute, OnSaveCanExecute);
         }
 
+        public async Task LoadAsync(int employeeId)
+        {
+            var employee = await _dataService.GetByIdAsync(employeeId);
+
+            Employee = new EmployeeWrapper(employee);
+            Employee.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(Employee.HasErrors))
+                {
+                    ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
+                }
+            };
+            ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
+        }
+
+        public EmployeeWrapper Employee
+        {
+            get { return _employee; }
+            private set
+            {
+                _employee = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ICommand SaveCommand { get; }
+
         private async void OnSaveExecute()
         {
-            await _dataService.SaveAsync(Employee);
+            await _dataService.SaveAsync(Employee.Model);
             _eventAggregator.GetEvent<EmployeeSavedEvent>()
                 .Publish(new EmployeeSavedEventArgs
                 {
@@ -42,8 +71,8 @@ namespace LinkExtractor.UI.ViewModel
 
         private bool OnSaveCanExecute()
         {
-            //Check if it is valid
-            return true;
+            //Check if employee has changes
+            return Employee!=null && !Employee.HasErrors;
         }
 
         private async void OnOpenFriendDetailView(int employeeId)
@@ -51,24 +80,7 @@ namespace LinkExtractor.UI.ViewModel
             await LoadAsync(employeeId);
         }
 
-        public async Task LoadAsync(int employeeId)
-        {
-            Employee = await _dataService.GetByIdAsync(employeeId);
-        }
 
-        private Employee _employee;
-
-        public Employee Employee
-        {
-            get { return _employee; }
-            private set
-            {
-                _employee = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ICommand SaveCommand { get; }
 
     }
 }
