@@ -1,5 +1,6 @@
 ﻿using LinkExtractor.Models;
 using LinkExtractor.UI.DataServices;
+using LinkExtractor.UI.DataServices.Repositories;
 using LinkExtractor.UI.Events;
 using LinkExtractor.UI.Wrapper;
 using Prism.Commands;
@@ -15,28 +16,31 @@ namespace LinkExtractor.UI.ViewModel
 {
     public class EmployeeDetailViewModel : ViewModelBase, IEmployeeDetailViewModel
     {
-        private IEmployeeDataService _dataService;
+        private IEmployeeRepository _employeeRepository;
         private IEventAggregator _eventAggregator;
         private EmployeeWrapper _employee;
 
-        public EmployeeDetailViewModel(IEmployeeDataService dataService,
+        public EmployeeDetailViewModel(IEmployeeRepository employeeRepository,
             IEventAggregator eventAggregator)
         {
-            _dataService = dataService;
+            _employeeRepository = employeeRepository;
             _eventAggregator = eventAggregator;
-            _eventAggregator.GetEvent<OpenEmployeeDetailViewEvent>()
-                .Subscribe(OnOpenFriendDetailView);
+
 
             SaveCommand = new DelegateCommand(OnSaveExecute, OnSaveCanExecute);
         }
 
         public async Task LoadAsync(int employeeId)
         {
-            var employee = await _dataService.GetByIdAsync(employeeId);
+            var employee = await _employeeRepository.GetByIdAsync(employeeId);
 
             Employee = new EmployeeWrapper(employee);
             Employee.PropertyChanged += (s, e) =>
             {
+                if (!HasChanges)
+                {
+                    HasChanges = _employeeRepository.HasChanges();
+                }
                 if (e.PropertyName == nameof(Employee.HasErrors))
                 {
                     ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
@@ -52,14 +56,33 @@ namespace LinkExtractor.UI.ViewModel
             {
                 _employee = value;
                 OnPropertyChanged();
+
             }
         }
+
+        private bool _hasChanges;
+
+        public bool HasChanges
+        {
+            get { return _hasChanges; }
+            set
+            {
+                if (_hasChanges != value)
+                {
+                    _hasChanges = value;
+                    OnPropertyChanged();
+                    ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
+                }
+            }
+        }
+
 
         public ICommand SaveCommand { get; }
 
         private async void OnSaveExecute()
         {
-            await _dataService.SaveAsync(Employee.Model);
+            await _employeeRepository.SaveAsync();
+            HasChanges = _employeeRepository.HasChanges();
             _eventAggregator.GetEvent<EmployeeSavedEvent>()
                 .Publish(new EmployeeSavedEventArgs
                 {
@@ -71,14 +94,9 @@ namespace LinkExtractor.UI.ViewModel
 
         private bool OnSaveCanExecute()
         {
-            //Check if employee has changes
-            return Employee!=null && !Employee.HasErrors;
+            return Employee != null && !Employee.HasErrors && HasChanges;
         }
 
-        private async void OnOpenFriendDetailView(int employeeId)
-        {
-            await LoadAsync(employeeId);
-        }
 
 
 

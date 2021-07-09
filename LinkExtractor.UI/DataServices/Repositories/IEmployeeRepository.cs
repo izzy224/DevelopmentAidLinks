@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace LinkExtractor.UI.DataServices
+namespace LinkExtractor.UI.DataServices.Repositories
 {
-    public interface IEmployeeDataService
+    public interface IEmployeeRepository
     {
         Task<Employee> GetByIdAsync(int employeeId);
-        Task SaveAsync(Employee employee);
+        Task SaveAsync();
+        bool HasChanges();
     }
 }

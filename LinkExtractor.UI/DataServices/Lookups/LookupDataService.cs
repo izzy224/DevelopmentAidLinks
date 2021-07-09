@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LinkExtractor.UI.DataServices
+namespace LinkExtractor.UI.DataServices.Lookups
 {
     public class LookupDataService : IEmployeeLookupDataService
     {

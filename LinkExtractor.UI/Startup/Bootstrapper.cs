@@ -1,6 +1,9 @@
 ﻿using Autofac;
 using LinkExtractor.DAL;
 using LinkExtractor.UI.DataServices;
+using LinkExtractor.UI.DataServices.Lookups;
+using LinkExtractor.UI.DataServices.Repositories;
+using LinkExtractor.UI.View.Services;
 using LinkExtractor.UI.ViewModel;
 using Prism.Events;
 
@@ -16,13 +19,15 @@ namespace LinkExtractor.UI.Startup
 
             builder.RegisterType<LinkExtractorDbContext>().AsSelf();
 
+            builder.RegisterType<MessageDialogService>().As<IMessageDialogService>();
+
             builder.RegisterType<MainWindow>().AsSelf();
             builder.RegisterType<MainViewModel>().AsSelf();
             builder.RegisterType<NavigationViewModel>().As<INavigationViewModel>();
             builder.RegisterType<EmployeeDetailViewModel>().As<IEmployeeDetailViewModel>();
 
             builder.RegisterType<LookupDataService>().AsImplementedInterfaces();
-            builder.RegisterType<EmployeeDataService>().As<IEmployeeDataService>();
+            builder.RegisterType<EmployeeRepository>().As<IEmployeeRepository>();
             
 
             return builder.Build();

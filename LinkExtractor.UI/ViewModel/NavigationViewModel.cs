@@ -1,5 +1,6 @@
 ﻿using LinkExtractor.Models;
 using LinkExtractor.UI.DataServices;
+using LinkExtractor.UI.DataServices.Lookups;
 using LinkExtractor.UI.Events;
 using Prism.Events;
 using System;
@@ -37,28 +38,13 @@ namespace LinkExtractor.UI.ViewModel
             Employees.Clear();
             foreach (var item in lookup)
             {
-                Employees.Add(new NavigationItemViewModel(item.Id, item.DisplayMember));
+                Employees.Add(new NavigationItemViewModel(item.Id, item.DisplayMember,_eventAggregator));
             }
         }
 
         public ObservableCollection<NavigationItemViewModel> Employees { get; }
 
-        private NavigationItemViewModel _selectedEmployee;
-
-        public NavigationItemViewModel SelectedEmployee
-        {
-            get { return _selectedEmployee; }
-            set
-            {
-                _selectedEmployee = value;
-                OnPropertyChanged();
-                if(_selectedEmployee!=null)
-                {
-                    _eventAggregator.GetEvent<OpenEmployeeDetailViewEvent>()
-                        .Publish(_selectedEmployee.Id);
-                }
-            }
-        }
+        
 
     }
 }
