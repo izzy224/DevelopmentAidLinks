@@ -5,15 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LinkExtractor.UI"
         xmlns:view="clr-namespace:LinkExtractor.UI.View"
+        xmlns:viewModel="clr-namespace:LinkExtractor.UI.ViewModel"
         mc:Ignorable="d"
         Title="Link Extractor" Height="450" Width="800">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type viewModel:EmployeeDetailViewModel}">
+            <view:EmployeeDetailView/>
+        </DataTemplate>
+    </Window.Resources>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <view:NavigationView DataContext="{Binding NavigationViewModel}" />
-        <view:EmployeeDetailView Grid.Column="1" DataContext="{Binding EmployeeDetailViewModel}"/>
+        <Menu Grid.ColumnSpan="2" FontSize="15">
+            <MenuItem Header="Create">
+                <MenuItem Header="Add Employee" Command="{Binding AddNewEmployeeCommand}"/>
+            </MenuItem>
+        </Menu>
+        <view:NavigationView Grid.Row="1" DataContext="{Binding NavigationViewModel}" />
+        <ContentControl Grid.Row="1" Grid.Column="1" Content="{Binding EmployeeDetailViewModel}"/>
 
         
     </Grid>

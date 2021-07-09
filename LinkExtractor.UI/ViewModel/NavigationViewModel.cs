@@ -24,13 +24,10 @@ namespace LinkExtractor.UI.ViewModel
             _eventAggregator = eventAggregator;
             Employees = new ObservableCollection<NavigationItemViewModel>();
             _eventAggregator.GetEvent<EmployeeSavedEvent>().Subscribe(EmployeeSaved);
+            _eventAggregator.GetEvent<EmployeeDeletedEvent>().Subscribe(EmployeeDeleted);
         }
 
-        private void EmployeeSaved(EmployeeSavedEventArgs obj)
-        {
-            var lookupItem = Employees.Single(e => e.Id == obj.Id);
-            lookupItem.DisplayMember = obj.DisplayMember;
-        }
+
 
         public async Task LoadAsync()
         {
@@ -44,7 +41,27 @@ namespace LinkExtractor.UI.ViewModel
 
         public ObservableCollection<NavigationItemViewModel> Employees { get; }
 
-        
+        private void EmployeeDeleted(int employeeId)
+        {
+            var employee = Employees.SingleOrDefault(e => e.Id == employeeId);
+            if(employee!=null)
+            {
+                Employees.Remove(employee);
+            }
+        }
+
+        private void EmployeeSaved(EmployeeSavedEventArgs obj)
+        {
+            var lookupItem = Employees.SingleOrDefault(e => e.Id == obj.Id);
+            if (lookupItem == null)
+            {
+                Employees.Add(new NavigationItemViewModel(obj.Id, obj.DisplayMember, _eventAggregator));
+            }
+            else
+            {
+                lookupItem.DisplayMember = obj.DisplayMember;
+            }
+        }
 
     }
 }

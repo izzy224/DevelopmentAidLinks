@@ -9,5 +9,7 @@ namespace LinkExtractor.UI.DataServices.Repositories
         Task<Employee> GetByIdAsync(int employeeId);
         Task SaveAsync();
         bool HasChanges();
+        void Add(Employee employee);
+        void Remove(Employee model);
     }
 }

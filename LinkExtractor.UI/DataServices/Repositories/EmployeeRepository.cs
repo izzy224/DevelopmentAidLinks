@@ -17,6 +17,12 @@ namespace LinkExtractor.UI.DataServices.Repositories
             _context = context;
         }
 
+        public void Add(Employee employee)
+        {
+            _context.Employees.Add(employee);
+
+        }
+
         public async Task<Employee> GetByIdAsync(int employeeId)
         {
             return await _context.Employees.SingleAsync(e => e.Id == employeeId);
@@ -25,6 +31,11 @@ namespace LinkExtractor.UI.DataServices.Repositories
         public bool HasChanges()
         {
             return _context.ChangeTracker.HasChanges();
+        }
+
+        public void Remove(Employee model)
+        {
+            _context.Employees.Remove(model);
         }
 
         public async Task SaveAsync()

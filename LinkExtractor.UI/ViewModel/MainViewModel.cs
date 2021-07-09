@@ -1,8 +1,10 @@
 ﻿using LinkExtractor.UI.Events;
 using LinkExtractor.UI.View.Services;
+using Prism.Commands;
 using Prism.Events;
 using System;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace LinkExtractor.UI.ViewModel
 {
@@ -22,8 +24,10 @@ namespace LinkExtractor.UI.ViewModel
             _messageDialogService = messageDialogService;
             _employeeDetailViewModelCreator = employeeDetailViewModelCreator;
             _eventAggregator.GetEvent<OpenEmployeeDetailViewEvent>()
-                .Subscribe(OnOpenFriendDetailView);
+                .Subscribe(OnOpenEmployeeDetailView);
+            _eventAggregator.GetEvent<EmployeeDeletedEvent>().Subscribe(EmployeeDeleted);
 
+            AddNewEmployeeCommand = new DelegateCommand(OnCreateNewEmployeeExecute);
             NavigationViewModel = navigationViewModel;
         }
 
@@ -34,8 +38,7 @@ namespace LinkExtractor.UI.ViewModel
             await NavigationViewModel.LoadAsync();
         }
 
-        
-
+        public ICommand AddNewEmployeeCommand { get; }
         public INavigationViewModel NavigationViewModel { get; }
         
 
@@ -47,7 +50,7 @@ namespace LinkExtractor.UI.ViewModel
 
 
         private Func<IEmployeeDetailViewModel> _employeeDetailViewModelCreator;
-        private async void OnOpenFriendDetailView(int employeeId)
+        private async void OnOpenEmployeeDetailView(int? employeeId)
         {
             if(EmployeeDetailViewModel!=null && EmployeeDetailViewModel.HasChanges)
             {
@@ -62,7 +65,15 @@ namespace LinkExtractor.UI.ViewModel
             await EmployeeDetailViewModel.LoadAsync(employeeId);
         }
 
+        private void OnCreateNewEmployeeExecute()
+        {
+            OnOpenEmployeeDetailView(null);
+        }
 
+        private void EmployeeDeleted(int employeeId)
+        {
+            EmployeeDetailViewModel = null;
+        }
     }
 }
 

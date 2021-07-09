@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LinkExtractor.UI.Events
 {
-    public class OpenEmployeeDetailViewEvent : PubSubEvent<int?>
+    public class EmployeeDeletedEvent:PubSubEvent<int>
     {
 
     }
