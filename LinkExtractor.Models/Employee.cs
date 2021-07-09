@@ -18,5 +18,8 @@ namespace LinkExtractor.Models
         [ EmailAddress]
         public string Email { get; set; }
 
+
+        public int? TeamId { get; set; }
+        public Team Team { get; set; }
     }
 }

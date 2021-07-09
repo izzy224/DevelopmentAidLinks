@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace LinkExtractor.UI.DataServices.Lookups
 {
-    public class LookupDataService : IEmployeeLookupDataService
+    public class LookupDataService : IEmployeeLookupDataService, ITeamsLookupDataService
     {
         private Func<LinkExtractorDbContext> _contextCreator;
 
@@ -28,6 +28,20 @@ namespace LinkExtractor.UI.DataServices.Lookups
                     {
                         Id = f.Id,
                         DisplayMember = f.Name + ' ' + f.Surname
+                    }).ToListAsync();
+            }
+        }
+
+        public async Task<IEnumerable<LookupItem>> GetTeamsLookupAsync()
+        {
+            using (var context = _contextCreator())
+            {
+                return await context.Teams.AsNoTracking()
+                    .Select(f =>
+                    new LookupItem
+                    {
+                        Id = f.Id,
+                        DisplayMember = f.Name
                     }).ToListAsync();
             }
         }

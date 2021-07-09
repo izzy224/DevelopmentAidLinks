@@ -1,5 +1,6 @@
 ﻿using LinkExtractor.Models;
 using LinkExtractor.UI.DataServices;
+using LinkExtractor.UI.DataServices.Lookups;
 using LinkExtractor.UI.DataServices.Repositories;
 using LinkExtractor.UI.Events;
 using LinkExtractor.UI.View.Services;
@@ -8,6 +9,7 @@ using Prism.Commands;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,26 +22,37 @@ namespace LinkExtractor.UI.ViewModel
         private IEmployeeRepository _employeeRepository;
         private IEventAggregator _eventAggregator;
         private IMessageDialogService _messageDialogService;
+        private ITeamsLookupDataService _teamsLookupDataService;
         private EmployeeWrapper _employee;
 
         public EmployeeDetailViewModel(IEmployeeRepository employeeRepository,
             IEventAggregator eventAggregator,
-            IMessageDialogService messageDialogService)
+            IMessageDialogService messageDialogService,
+            ITeamsLookupDataService teamsLookupDataService)
         {
             _employeeRepository = employeeRepository;
             _eventAggregator = eventAggregator;
             _messageDialogService = messageDialogService;
+            _teamsLookupDataService = teamsLookupDataService;
 
             SaveCommand = new DelegateCommand(OnSaveExecute, OnSaveCanExecute);
             DeleteCommand = new DelegateCommand(OnDeleteExecute);
+
+            Teams = new ObservableCollection<LookupItem>();
         }
 
 
 
         public async Task LoadAsync(int? employeeId)
         {
-            var employee = employeeId.HasValue ? await _employeeRepository.GetByIdAsync(employeeId.Value) : CreateNewEmployee() ;
+            var employee = employeeId.HasValue ? await _employeeRepository.GetByIdAsync(employeeId.Value) : CreateNewEmployee();
+            InitializeEmployee(employee);
 
+            await LoadTeamsLookupAsync();
+        }
+
+        private void InitializeEmployee(Employee employee)
+        {
             Employee = new EmployeeWrapper(employee);
             Employee.PropertyChanged += (s, e) =>
             {
@@ -54,7 +67,7 @@ namespace LinkExtractor.UI.ViewModel
             };
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
 
-            if(Employee.Id==0)
+            if (Employee.Id == 0)
             {
                 //For triggering the validation
                 Employee.Name = "";
@@ -63,7 +76,16 @@ namespace LinkExtractor.UI.ViewModel
             }
         }
 
-
+        private async Task LoadTeamsLookupAsync()
+        {
+            Teams.Clear();
+            Teams.Add(new NullLookupItem());
+            var lookup = await _teamsLookupDataService.GetTeamsLookupAsync();
+            foreach (var lookupItem in lookup)
+            {
+                Teams.Add(lookupItem);
+            }
+        }
 
         public EmployeeWrapper Employee
         {
@@ -94,6 +116,7 @@ namespace LinkExtractor.UI.ViewModel
 
         public ICommand SaveCommand { get; }
         public ICommand DeleteCommand { get; }
+        public ObservableCollection<LookupItem> Teams { get; }
 
         private async void OnSaveExecute()
         {

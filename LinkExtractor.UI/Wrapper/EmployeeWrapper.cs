@@ -25,7 +25,11 @@ namespace LinkExtractor.UI.Wrapper
             }
         }
 
-
+        public int? TeamId
+        {
+            get { return GetValue<int?>(); }
+            set { SetValue(value); }
+        }
 
 
         public string Surname
