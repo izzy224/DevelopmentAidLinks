@@ -11,7 +11,7 @@ namespace LinkExtractor.UI.ViewModel
     public class MainViewModel : ViewModelBase
     {
 
-        private IEmployeeDetailViewModel _employeeDetailViewModel;
+        private IDetailViewModel _detailViewModel;
         private IEventAggregator _eventAggregator;
         private IMessageDialogService _messageDialogService;
 
@@ -23,11 +23,12 @@ namespace LinkExtractor.UI.ViewModel
             _eventAggregator = eventAggregator;
             _messageDialogService = messageDialogService;
             _employeeDetailViewModelCreator = employeeDetailViewModelCreator;
-            _eventAggregator.GetEvent<OpenEmployeeDetailViewEvent>()
-                .Subscribe(OnOpenEmployeeDetailView);
-            _eventAggregator.GetEvent<EmployeeDeletedEvent>().Subscribe(EmployeeDeleted);
+            _eventAggregator.GetEvent<OpenDetailViewEvent>()
+                .Subscribe(OnOpenDetailView);
+            _eventAggregator.GetEvent<DetailDeletedEvent>()
+                .Subscribe(DetailDeleted);
 
-            AddNewEmployeeCommand = new DelegateCommand(OnCreateNewEmployeeExecute);
+            AddNewDetailCommand = new DelegateCommand<Type>(OnCreateNewDetailExecute);
             NavigationViewModel = navigationViewModel;
         }
 
@@ -38,21 +39,21 @@ namespace LinkExtractor.UI.ViewModel
             await NavigationViewModel.LoadAsync();
         }
 
-        public ICommand AddNewEmployeeCommand { get; }
+        public ICommand AddNewDetailCommand { get; }
         public INavigationViewModel NavigationViewModel { get; }
         
 
-        public IEmployeeDetailViewModel EmployeeDetailViewModel
+        public IDetailViewModel DetailViewModel
         {
-            get { return _employeeDetailViewModel; }
-            private set { _employeeDetailViewModel = value; OnPropertyChanged(); }
+            get { return _detailViewModel; }
+            private set { _detailViewModel = value; OnPropertyChanged(); }
         }
 
 
         private Func<IEmployeeDetailViewModel> _employeeDetailViewModelCreator;
-        private async void OnOpenEmployeeDetailView(int? employeeId)
+        private async void OnOpenDetailView(OpenDetailViewEventArgs args)
         {
-            if(EmployeeDetailViewModel!=null && EmployeeDetailViewModel.HasChanges)
+            if(DetailViewModel!=null && DetailViewModel.HasChanges)
             {
                 var res = _messageDialogService.ShowOkCancelDialog("Changes have been made. Navigate away?", "Question");
 
@@ -61,18 +62,24 @@ namespace LinkExtractor.UI.ViewModel
                     return;
                 }
             }
-            EmployeeDetailViewModel = _employeeDetailViewModelCreator();
-            await EmployeeDetailViewModel.LoadAsync(employeeId);
+            switch(args.ViewModelName)
+            {
+                case nameof(EmployeeDetailViewModel):
+                    DetailViewModel = _employeeDetailViewModelCreator();
+                    break;
+            }
+            
+            await DetailViewModel.LoadAsync(args.Id);
         }
 
-        private void OnCreateNewEmployeeExecute()
+        private void OnCreateNewDetailExecute(Type viewModelType)
         {
-            OnOpenEmployeeDetailView(null);
+            OnOpenDetailView(new OpenDetailViewEventArgs() { ViewModelName = viewModelType.Name});
         }
 
-        private void EmployeeDeleted(int employeeId)
+        private void DetailDeleted(DetailDeletedEventArgs args)
         {
-            EmployeeDetailViewModel = null;
+            DetailViewModel = null;
         }
     }
 }

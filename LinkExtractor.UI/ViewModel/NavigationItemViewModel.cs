@@ -13,13 +13,16 @@ namespace LinkExtractor.UI.ViewModel
     public class NavigationItemViewModel : ViewModelBase
     {
         private string _displayMember;
+        private IEventAggregator _eventAggregator;
+        private string _detailViewModelName;
 
-        public NavigationItemViewModel(int id, string displayMember, IEventAggregator eventAggregator)
+        public NavigationItemViewModel(int id, string displayMember, IEventAggregator eventAggregator, string detailViewModelName)
         {
             Id = id;
             DisplayMember = displayMember;
             _eventAggregator = eventAggregator;
-            OpenEmployeeDetailViewCommand = new DelegateCommand(OnOpenEmployeeDetailView);
+            _detailViewModelName = detailViewModelName;
+            OpenDetailViewCommand = new DelegateCommand(OnOpenDetailViewExecute);
             
         }
 
@@ -33,14 +36,14 @@ namespace LinkExtractor.UI.ViewModel
             set { _displayMember = value; OnPropertyChanged(); }
         }
 
-        public ICommand OpenEmployeeDetailViewCommand { get; }
+        public ICommand OpenDetailViewCommand { get; }
 
-        private IEventAggregator _eventAggregator;
+        
 
-        private void OnOpenEmployeeDetailView()
+        private void OnOpenDetailViewExecute()
         {
-            _eventAggregator.GetEvent<OpenEmployeeDetailViewEvent>()
-                .Publish(Id);
+            _eventAggregator.GetEvent<OpenDetailViewEvent>()
+                .Publish(new OpenDetailViewEventArgs() { Id = Id,ViewModelName = _detailViewModelName});
         }
     }
 }

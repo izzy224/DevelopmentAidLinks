@@ -2,46 +2,22 @@
 using LinkExtractor.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace LinkExtractor.UI.DataServices.Repositories
 {
-    public class EmployeeRepository : IEmployeeRepository
+    public class EmployeeRepository : GenericRepository<Employee, LinkExtractorDbContext>, IEmployeeRepository
     {
-        private LinkExtractorDbContext _context;
 
-        public EmployeeRepository(LinkExtractorDbContext context)
+        public EmployeeRepository(LinkExtractorDbContext context) :base(context)
         {
-            _context = context;
         }
-
-        public void Add(Employee employee)
+        
+        public override async Task<Employee> GetByIdAsync(int employeeId)
         {
-            _context.Employees.Add(employee);
-
+            return await Context.Employees.SingleAsync(e => e.Id == employeeId);
         }
-
-        public async Task<Employee> GetByIdAsync(int employeeId)
-        {
-            return await _context.Employees.SingleAsync(e => e.Id == employeeId);
-        }
-
-        public bool HasChanges()
-        {
-            return _context.ChangeTracker.HasChanges();
-        }
-
-        public void Remove(Employee model)
-        {
-            _context.Employees.Remove(model);
-        }
-
-        public async Task SaveAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
-
     }
 }
+

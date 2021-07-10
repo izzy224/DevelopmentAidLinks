@@ -23,8 +23,8 @@ namespace LinkExtractor.UI.ViewModel
             _employeeLookupService = employeeLookupService;
             _eventAggregator = eventAggregator;
             Employees = new ObservableCollection<NavigationItemViewModel>();
-            _eventAggregator.GetEvent<EmployeeSavedEvent>().Subscribe(EmployeeSaved);
-            _eventAggregator.GetEvent<EmployeeDeletedEvent>().Subscribe(EmployeeDeleted);
+            _eventAggregator.GetEvent<DetailSavedEvent>().Subscribe(DetailSaved);
+            _eventAggregator.GetEvent<DetailDeletedEvent>().Subscribe(DetailDeleted);
         }
 
 
@@ -35,32 +35,48 @@ namespace LinkExtractor.UI.ViewModel
             Employees.Clear();
             foreach (var item in lookup)
             {
-                Employees.Add(new NavigationItemViewModel(item.Id, item.DisplayMember,_eventAggregator));
+                Employees.Add(new NavigationItemViewModel(item.Id, item.DisplayMember,_eventAggregator, nameof(EmployeeDetailViewModel)));
             }
         }
 
         public ObservableCollection<NavigationItemViewModel> Employees { get; }
 
-        private void EmployeeDeleted(int employeeId)
+        private void DetailDeleted(DetailDeletedEventArgs args)
         {
-            var employee = Employees.SingleOrDefault(e => e.Id == employeeId);
-            if(employee!=null)
+            switch(args.ViewModelName)
             {
-                Employees.Remove(employee);
+                case nameof(EmployeeDetailViewModel):
+                    {
+                        var employee = Employees.SingleOrDefault(e => e.Id == args.Id);
+                        if (employee != null)
+                        {
+                            Employees.Remove(employee);
+                        }
+                    }
+                    break;
+                
             }
+
         }
 
-        private void EmployeeSaved(EmployeeSavedEventArgs obj)
+        private void DetailSaved(DetailSavedEventArgs args)
         {
-            var lookupItem = Employees.SingleOrDefault(e => e.Id == obj.Id);
-            if (lookupItem == null)
+            switch(args.ViewModelName)
             {
-                Employees.Add(new NavigationItemViewModel(obj.Id, obj.DisplayMember, _eventAggregator));
+                case nameof(EmployeeDetailViewModel):
+                    {
+                        var lookupItem = Employees.SingleOrDefault(e => e.Id == args.Id);
+                        if (lookupItem == null)
+                        {
+                            Employees.Add(new NavigationItemViewModel(args.Id, args.DisplayMember, _eventAggregator, nameof(EmployeeDetailViewModel)));
+                        }
+                        else
+                        {
+                            lookupItem.DisplayMember = args.DisplayMember;
+                        }
+                    }break;
             }
-            else
-            {
-                lookupItem.DisplayMember = obj.DisplayMember;
-            }
+
         }
 
     }

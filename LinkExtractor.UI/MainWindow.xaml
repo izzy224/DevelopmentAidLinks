@@ -24,11 +24,12 @@
         </Grid.ColumnDefinitions>
         <Menu Grid.ColumnSpan="2" FontSize="15">
             <MenuItem Header="Create">
-                <MenuItem Header="Add Employee" Command="{Binding AddNewEmployeeCommand}"/>
+                <MenuItem Header="Add Employee" Command="{Binding AddNewDetailCommand}"
+                    CommandParameter="{x:Type viewModel:EmployeeDetailViewModel}"/>
             </MenuItem>
         </Menu>
         <view:NavigationView Grid.Row="1" DataContext="{Binding NavigationViewModel}" />
-        <ContentControl Grid.Row="1" Grid.Column="1" Content="{Binding EmployeeDetailViewModel}"/>
+        <ContentControl Grid.Row="1" Grid.Column="1" Content="{Binding DetailViewModel}"/>
 
         
     </Grid>

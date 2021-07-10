@@ -17,33 +17,29 @@ using System.Windows.Input;
 
 namespace LinkExtractor.UI.ViewModel
 {
-    public class EmployeeDetailViewModel : ViewModelBase, IEmployeeDetailViewModel
+    public class EmployeeDetailViewModel : DetailViewModelBase, IEmployeeDetailViewModel
     {
         private IEmployeeRepository _employeeRepository;
-        private IEventAggregator _eventAggregator;
         private IMessageDialogService _messageDialogService;
         private ITeamsLookupDataService _teamsLookupDataService;
         private EmployeeWrapper _employee;
+        private bool _hasChanges;
 
         public EmployeeDetailViewModel(IEmployeeRepository employeeRepository,
             IEventAggregator eventAggregator,
             IMessageDialogService messageDialogService,
-            ITeamsLookupDataService teamsLookupDataService)
+            ITeamsLookupDataService teamsLookupDataService):base(eventAggregator)
         {
             _employeeRepository = employeeRepository;
-            _eventAggregator = eventAggregator;
             _messageDialogService = messageDialogService;
             _teamsLookupDataService = teamsLookupDataService;
-
-            SaveCommand = new DelegateCommand(OnSaveExecute, OnSaveCanExecute);
-            DeleteCommand = new DelegateCommand(OnDeleteExecute);
 
             Teams = new ObservableCollection<LookupItem>();
         }
 
 
 
-        public async Task LoadAsync(int? employeeId)
+        public override async Task LoadAsync(int? employeeId)
         {
             var employee = employeeId.HasValue ? await _employeeRepository.GetByIdAsync(employeeId.Value) : CreateNewEmployee();
             InitializeEmployee(employee);
@@ -98,53 +94,28 @@ namespace LinkExtractor.UI.ViewModel
             }
         }
 
-        private bool _hasChanges;
-
-        public bool HasChanges
-        {
-            get { return _hasChanges; }
-            set
-            {
-                if (_hasChanges != value)
-                {
-                    _hasChanges = value;
-                    OnPropertyChanged();
-                    ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
-                }
-            }
-        }
-
-        public ICommand SaveCommand { get; }
-        public ICommand DeleteCommand { get; }
         public ObservableCollection<LookupItem> Teams { get; }
 
-        private async void OnSaveExecute()
+        protected override async void OnSaveExecute()
         {
             await _employeeRepository.SaveAsync();
             HasChanges = _employeeRepository.HasChanges();
-            _eventAggregator.GetEvent<EmployeeSavedEvent>()
-                .Publish(new EmployeeSavedEventArgs
-                {
-                    Id = Employee.Id,
-                    DisplayMember = Employee.Name + ' ' + Employee.Surname
-                }
-                );
+            RaiseDetailSavedEvent(Employee.Id, Employee.Name + ' ' + Employee.Surname);
         }
 
-        private bool OnSaveCanExecute()
+        protected override bool OnSaveCanExecute()
         {
             return Employee != null && !Employee.HasErrors && HasChanges;
         }
 
-        private async void OnDeleteExecute()
+        protected override async void OnDeleteExecute()
         {
             var res = _messageDialogService.ShowOkCancelDialog($"Are you sure you want to delete the employee {Employee.Name} {Employee.Surname}", "Confirmation dialog");
             if (res == MessageDialogResult.Ok)
             {
-
                 _employeeRepository.Remove(Employee.Model);
                 await _employeeRepository.SaveAsync();
-                _eventAggregator.GetEvent<EmployeeDeletedEvent>().Publish(Employee.Id);
+                RaiseDetailDeletedEvent(Employee.Id);
             }
         }
 
@@ -154,7 +125,5 @@ namespace LinkExtractor.UI.ViewModel
             _employeeRepository.Add(employee);
             return employee;
         }
-
-
     }
 }

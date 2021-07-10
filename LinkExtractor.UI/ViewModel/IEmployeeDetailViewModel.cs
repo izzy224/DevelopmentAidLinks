@@ -1,10 +1,6 @@
-﻿using System.Threading.Tasks;
-
-namespace LinkExtractor.UI.ViewModel
+﻿namespace LinkExtractor.UI.ViewModel
 {
-    public interface IEmployeeDetailViewModel
+    public interface IEmployeeDetailViewModel : IDetailViewModel
     {
-        Task LoadAsync(int? friendId);
-        bool HasChanges { get; }
     }
 }
