@@ -12,6 +12,9 @@
         <DataTemplate DataType="{x:Type viewModel:EmployeeDetailViewModel}">
             <view:EmployeeDetailView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModel:WorkshiftDetailViewModel}">
+            <view:WorkshiftDetailView/>
+        </DataTemplate>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -24,8 +27,10 @@
         </Grid.ColumnDefinitions>
         <Menu Grid.ColumnSpan="2" FontSize="15">
             <MenuItem Header="Create">
-                <MenuItem Header="Add Employee" Command="{Binding AddNewDetailCommand}"
+                <MenuItem Header="Add Employee" Command="{Binding CreateNewDetailCommand}"
                     CommandParameter="{x:Type viewModel:EmployeeDetailViewModel}"/>
+                <MenuItem Header="Add Workshift" Command="{Binding CreateNewDetailCommand}"
+                    CommandParameter="{x:Type viewModel:WorkshiftDetailViewModel}"/>
             </MenuItem>
         </Menu>
         <view:NavigationView Grid.Row="1" DataContext="{Binding NavigationViewModel}" />

@@ -22,13 +22,15 @@ namespace LinkExtractor.UI.Startup
             builder.RegisterType<MessageDialogService>().As<IMessageDialogService>();
 
             builder.RegisterType<MainWindow>().AsSelf();
+
             builder.RegisterType<MainViewModel>().AsSelf();
             builder.RegisterType<NavigationViewModel>().As<INavigationViewModel>();
-            builder.RegisterType<EmployeeDetailViewModel>().As<IEmployeeDetailViewModel>();
+            builder.RegisterType<EmployeeDetailViewModel>().Keyed<IDetailViewModel>(nameof(EmployeeDetailViewModel));
+            builder.RegisterType<WorkshiftDetailViewModel>().Keyed<IDetailViewModel>(nameof(WorkshiftDetailViewModel));
 
             builder.RegisterType<LookupDataService>().AsImplementedInterfaces();
             builder.RegisterType<EmployeeRepository>().As<IEmployeeRepository>();
-            
+            builder.RegisterType<WorkshiftRepository>().As<IWorkshiftRepository>();
 
             return builder.Build();
         }

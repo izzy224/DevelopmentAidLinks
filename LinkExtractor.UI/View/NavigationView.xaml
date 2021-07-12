@@ -6,40 +6,52 @@
              xmlns:local="clr-namespace:LinkExtractor.UI.View"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding Employees}">
-                <ItemsControl.ItemContainerStyle>
-                    <Style TargetType="ContentPresenter">
-                        <Setter Property="HorizontalAlignment" Value="Left"/>
-                        <Setter Property="Margin" Value="3"/>
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Button Content="{Binding DisplayMember}" 
+    <UserControl.Resources>
+        <Style x:Key="NavigationItemContainerStyle" TargetType="ContentPresenter">
+             <Setter Property="HorizontalAlignment" Value="Left"/>
+             <Setter Property="Margin" Value="3"/>
+        </Style>
+        
+        <DataTemplate x:Key="NavigationItemTemplate">
+            <Button Content="{Binding DisplayMember}" 
                                 Command="{Binding OpenDetailViewCommand}">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Grid x:Name="grid">
-                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="grid">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                                    </Grid>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Cursor" Value="Hand"/>
-                                            <Setter Property="FontWeight" Value="Bold"/>
-                                        </Trigger>
-                                        <Trigger Property="IsPressed" Value="True">
-                                            <Setter Property="FontWeight" Value="Normal"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="FontWeight" Value="Normal"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </DataTemplate>
+        
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="300"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <GroupBox Header="Employees">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Employees}" ItemContainerStyle="{StaticResource NavigationItemContainerStyle}"
+                              ItemTemplate="{StaticResource NavigationItemTemplate}"/>
+            </ScrollViewer>
+        </GroupBox>
+        <GroupBox Header="Workshifts" Grid.Row="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Workshifts}" ItemContainerStyle="{StaticResource NavigationItemContainerStyle}"
+                              ItemTemplate="{StaticResource NavigationItemTemplate}"/>
+            </ScrollViewer>
+        </GroupBox>
     </Grid>
 </UserControl>

@@ -1,4 +1,5 @@
-﻿using LinkExtractor.UI.Events;
+﻿using Autofac.Features.Indexed;
+using LinkExtractor.UI.Events;
 using LinkExtractor.UI.View.Services;
 using Prism.Commands;
 using Prism.Events;
@@ -14,21 +15,22 @@ namespace LinkExtractor.UI.ViewModel
         private IDetailViewModel _detailViewModel;
         private IEventAggregator _eventAggregator;
         private IMessageDialogService _messageDialogService;
+        private IIndex<string, IDetailViewModel> _detailViewModelCreator;
 
         public MainViewModel(INavigationViewModel navigationViewModel,
-            Func<IEmployeeDetailViewModel> employeeDetailViewModelCreator,
+            IIndex<string,IDetailViewModel> detailViewModelCreator,
             IEventAggregator eventAggregator,
             IMessageDialogService messageDialogService)
         {
             _eventAggregator = eventAggregator;
             _messageDialogService = messageDialogService;
-            _employeeDetailViewModelCreator = employeeDetailViewModelCreator;
+            _detailViewModelCreator = detailViewModelCreator;
             _eventAggregator.GetEvent<OpenDetailViewEvent>()
                 .Subscribe(OnOpenDetailView);
             _eventAggregator.GetEvent<DetailDeletedEvent>()
                 .Subscribe(DetailDeleted);
 
-            AddNewDetailCommand = new DelegateCommand<Type>(OnCreateNewDetailExecute);
+            CreateNewDetailCommand = new DelegateCommand<Type>(OnCreateNewDetailExecute);
             NavigationViewModel = navigationViewModel;
         }
 
@@ -39,7 +41,7 @@ namespace LinkExtractor.UI.ViewModel
             await NavigationViewModel.LoadAsync();
         }
 
-        public ICommand AddNewDetailCommand { get; }
+        public ICommand CreateNewDetailCommand { get; }
         public INavigationViewModel NavigationViewModel { get; }
         
 
@@ -50,7 +52,7 @@ namespace LinkExtractor.UI.ViewModel
         }
 
 
-        private Func<IEmployeeDetailViewModel> _employeeDetailViewModelCreator;
+
         private async void OnOpenDetailView(OpenDetailViewEventArgs args)
         {
             if(DetailViewModel!=null && DetailViewModel.HasChanges)
@@ -62,13 +64,19 @@ namespace LinkExtractor.UI.ViewModel
                     return;
                 }
             }
-            switch(args.ViewModelName)
-            {
-                case nameof(EmployeeDetailViewModel):
-                    DetailViewModel = _employeeDetailViewModelCreator();
-                    break;
-            }
-            
+            //switch(args.ViewModelName)
+            //{
+            //    case nameof(EmployeeDetailViewModel):
+            //        DetailViewModel = _employeeDetailViewModelCreator();
+            //        break;
+            //    case nameof(WorkshiftDetailViewModel):
+            //        DetailViewModel = _workshiftDetailViewModelCreator();
+            //        break;
+            //    default:
+            //        throw new Exception($"ViewModel {args.ViewModelName} not mapped");
+            //}
+
+            DetailViewModel = _detailViewModelCreator[args.ViewModelName];
             await DetailViewModel.LoadAsync(args.Id);
         }
 

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace LinkExtractor.UI.DataServices.Lookups
 {
-    public class LookupDataService : IEmployeeLookupDataService, ITeamsLookupDataService
+    public class LookupDataService : IEmployeeLookupDataService, ITeamsLookupDataService, IWorkshiftLookupDataService
     {
         private Func<LinkExtractorDbContext> _contextCreator;
 
@@ -42,6 +42,20 @@ namespace LinkExtractor.UI.DataServices.Lookups
                     {
                         Id = f.Id,
                         DisplayMember = f.Name
+                    }).ToListAsync();
+            }
+        }
+
+        public async Task<List<LookupItem>> GetWorkshiftLookupAsync()
+        {
+            using (var context = _contextCreator())
+            {
+                return await context.Workshifts.AsNoTracking()
+                    .Select(f =>
+                    new LookupItem
+                    {
+                        Id = f.Id,
+                        DisplayMember = f.Date.ToShortDateString()
                     }).ToListAsync();
             }
         }
