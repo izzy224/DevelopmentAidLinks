@@ -10,7 +10,7 @@ namespace LinkExtractor.Models
     {
         public Employee()
         {
-            EmployeeWorkshifts = new Collection<EmployeeWorkshift>();
+            Workshifts = new Collection<Workshift>();
         }
 
         [Key]
@@ -27,6 +27,6 @@ namespace LinkExtractor.Models
         public string Email { get; set; }
         public int? TeamId { get; set; }
         public Team Team { get; set; }
-        public ICollection<EmployeeWorkshift> EmployeeWorkshifts { get; set; }
+        public ICollection<Workshift> Workshifts { get; set; }
     }
 }

@@ -8,7 +8,8 @@ namespace LinkExtractor.DAL
     public class LinkExtractorDbContext : DbContext
     {
         public DbSet<Employee> Employees { get; set; }
-
+        public DbSet<Team> Teams { get; set; }
+        public DbSet<Workshift> Workshifts { get; set; }
         public LinkExtractorDbContext() : base() { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

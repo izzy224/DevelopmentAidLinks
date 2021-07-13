@@ -9,6 +9,11 @@ namespace LinkExtractor.UI.View.Services
 {
     public class MessageDialogService : IMessageDialogService
     {
+        public void ShowInfoDialog(string text)
+        {
+            MessageBox.Show(text);
+        }
+
         public MessageDialogResult ShowOkCancelDialog(string text, string title)
         {
             var res = MessageBox.Show(text, title, MessageBoxButton.OKCancel);

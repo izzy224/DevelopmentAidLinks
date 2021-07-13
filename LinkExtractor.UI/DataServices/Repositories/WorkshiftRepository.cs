@@ -15,7 +15,6 @@ namespace LinkExtractor.UI.DataServices.Repositories
         public async override Task<Workshift> GetByIdAsync(int id)
         {
             return await Context.Workshifts
-                .Include(w => w.EmployeeWorkshifts)
                 .Include(w => w.Employees)
                 .SingleAsync(w => w.Id == id);
         }

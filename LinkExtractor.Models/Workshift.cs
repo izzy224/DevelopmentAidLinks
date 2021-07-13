@@ -12,12 +12,11 @@ namespace LinkExtractor.Models
     {
         public Workshift()
         {
-            EmployeeWorkshifts = new Collection<EmployeeWorkshift>();
+            Employees = new Collection<Employee>();
         }
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public DateTime Date { get; set; }
-        public ICollection<EmployeeWorkshift> EmployeeWorkshifts { get; set; }
         public ICollection<Employee> Employees { get; set; }
     }
 }

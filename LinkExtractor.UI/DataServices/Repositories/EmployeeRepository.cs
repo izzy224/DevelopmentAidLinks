@@ -14,9 +14,17 @@ namespace LinkExtractor.UI.DataServices.Repositories
         {
         }
         
+
         public override async Task<Employee> GetByIdAsync(int employeeId)
         {
             return await Context.Employees.SingleAsync(e => e.Id == employeeId);
+        }
+
+        public async Task<bool> HasShiftsAsync(int employeeId)
+        {
+            return await Context.Workshifts.AsNoTracking()
+                .Include(e => e.Employees)
+                .AnyAsync(e => e.Employees.Any(e => e.Id == employeeId));
         }
     }
 }

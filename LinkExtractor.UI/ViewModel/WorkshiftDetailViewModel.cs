@@ -88,8 +88,20 @@ namespace LinkExtractor.UI.ViewModel
         private void SetupPicklist()
         {
             var workshiftEmployeeIds = Workshift.Model.Employees.Select(e => e.Id).ToList();
-            var addedEmployees = _allEmployees.Where(e => workshiftEmployeeIds.Contains(e.Id)).OrderBy(e => e.Id);
-            //Left off here
+            var addedEmployees = _allEmployees.Where(e => workshiftEmployeeIds.Contains(e.Id)).OrderBy(e => e.Name);
+            var availableEmployees = _allEmployees.Except(addedEmployees).OrderBy(e => e.Name);
+
+            AddedEmployees.Clear();
+            AvailableEmployees.Clear();
+
+            foreach (var e in addedEmployees)
+            {
+                AddedEmployees.Add(e);
+            }
+            foreach(var e in availableEmployees)
+            {
+                AvailableEmployees.Add(e);
+            }
         }
 
         protected override void OnDeleteExecute()
@@ -150,7 +162,13 @@ namespace LinkExtractor.UI.ViewModel
 
         private void OnRemoveEmployeeExecute()
         {
-            throw new NotImplementedException();
+            var employeeToRemove = SelectedAddedEmployee;
+
+            Workshift.Model.Employees.Remove(employeeToRemove);
+            AvailableEmployees.Add(employeeToRemove);
+            AddedEmployees.Remove(employeeToRemove);
+            HasChanges = _workshiftRepository.HasChanges();
+            ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
         }
 
         private bool OnRemoveEmployeeCanExecute()
@@ -165,7 +183,13 @@ namespace LinkExtractor.UI.ViewModel
 
         private void OnAddEmployeeExecute()
         {
-            throw new NotImplementedException();
+            var employeeToAdd = SelectedAvailableEmployee;
+
+            Workshift.Model.Employees.Add(employeeToAdd);
+            AddedEmployees.Add(employeeToAdd);
+            AvailableEmployees.Remove(employeeToAdd);
+            HasChanges = _workshiftRepository.HasChanges();
+            ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
         }
     }
 }

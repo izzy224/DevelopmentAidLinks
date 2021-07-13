@@ -28,7 +28,7 @@ namespace LinkExtractor.UI.ViewModel
         public EmployeeDetailViewModel(IEmployeeRepository employeeRepository,
             IEventAggregator eventAggregator,
             IMessageDialogService messageDialogService,
-            ITeamsLookupDataService teamsLookupDataService):base(eventAggregator)
+            ITeamsLookupDataService teamsLookupDataService) : base(eventAggregator)
         {
             _employeeRepository = employeeRepository;
             _messageDialogService = messageDialogService;
@@ -110,6 +110,12 @@ namespace LinkExtractor.UI.ViewModel
 
         protected override async void OnDeleteExecute()
         {
+            if (await _employeeRepository.HasShiftsAsync(Employee.Id))
+            {
+                _messageDialogService.ShowInfoDialog($"{Employee.Name} {Employee.Surname} can't be deleted as he is involved in shifts");
+                return;
+            }
+
             var res = _messageDialogService.ShowOkCancelDialog($"Are you sure you want to delete the employee {Employee.Name} {Employee.Surname}", "Confirmation dialog");
             if (res == MessageDialogResult.Ok)
             {
@@ -117,6 +123,7 @@ namespace LinkExtractor.UI.ViewModel
                 await _employeeRepository.SaveAsync();
                 RaiseDetailDeletedEvent(Employee.Id);
             }
+
         }
 
         private Employee CreateNewEmployee()
