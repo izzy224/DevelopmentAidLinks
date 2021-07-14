@@ -77,7 +77,7 @@ namespace LinkExtractor.UI.ViewModel
             //}
 
             DetailViewModel = _detailViewModelCreator[args.ViewModelName];
-            await DetailViewModel.LoadAsync(args.Id);
+            await DetailViewModel.LoadAsync(args.Id, args.Data);
         }
 
         private void OnCreateNewDetailExecute(Type viewModelType)

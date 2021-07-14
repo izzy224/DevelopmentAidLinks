@@ -4,7 +4,7 @@ namespace LinkExtractor.UI.ViewModel
 {
     public interface IDetailViewModel
     {
-        Task LoadAsync(int? id);
+        Task LoadAsync(int? id, string data);
         bool HasChanges { get; }
     }
 }

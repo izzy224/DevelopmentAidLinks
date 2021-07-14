@@ -16,8 +16,8 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Label Content="Date" Margin="10 10 10 0"></Label>
-        <DatePicker Grid.Row="1" Text="" SelectedDate="{Binding Workshift.Date, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <!--<Label Content="Date" Margin="10 10 10 0"></Label>
+        <DatePicker Grid.Row="1" Text="" SelectedDate="{Binding Workshift.Date, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>-->
 
         <StackPanel Grid.Row="3" Orientation="Horizontal">
             <Button Content="Save" Width="75" Margin="10" Command="{Binding SaveCommand}"/>
@@ -37,6 +37,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Label Content="Added employees"></Label>
@@ -50,6 +51,11 @@
             <Label Content="Available Employees" Grid.Column="2"/>
             <ListView Grid.Row="1" ItemsSource="{Binding AvailableEmployees}"
                 SelectedItem="{Binding SelectedAvailableEmployee}" Grid.Column="2"/>
+
+            <StackPanel Grid.Row="3" Orientation="Horizontal">
+                <Button Content="Get tenders for current" Width="75" Margin="10" Command="{Binding GetTenderSingle}"/>
+                <Button Content="Get all" Width="75" Margin="10" Command="{Binding GetTenderAll}"/>
+            </StackPanel>
         </Grid>
         
     </Grid>

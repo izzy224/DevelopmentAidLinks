@@ -73,11 +73,11 @@ namespace LinkExtractor.UI.ViewModel
             }
         }
 
-        public override async Task LoadAsync(int? workshiftId)
+        public override async Task LoadAsync(int? workshiftId, string data = null)
         {
-            var workshift = workshiftId.HasValue
+            var workshift = workshiftId.HasValue && workshiftId.Value != 0
                 ? await _workshiftRepository.GetByIdAsync(workshiftId.Value)
-                : CreateNewWorkshift();
+                : CreateNewWorkshift(data);
 
             InitializeWorkshift(workshift);
 
@@ -127,11 +127,11 @@ namespace LinkExtractor.UI.ViewModel
             RaiseDetailSavedEvent(Workshift.Id, Workshift.Date.ToShortDateString());
         }
 
-        private Workshift CreateNewWorkshift()
+        private Workshift CreateNewWorkshift(string data)
         {
             var workshift = new Workshift()
             {
-                Date = DateTime.Now
+                Date = Convert.ToDateTime(data)
             };
             _workshiftRepository.Add(workshift);
             return workshift;
@@ -153,9 +153,6 @@ namespace LinkExtractor.UI.ViewModel
             };
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
 
-
-            if (Workshift.Id == 0)
-                Workshift.Date = DateTime.Now;
         }
 
 

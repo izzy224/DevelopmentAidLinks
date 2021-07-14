@@ -38,7 +38,6 @@ namespace LinkExtractor.UI.ViewModel
 
         public ICommand OpenDetailViewCommand { get; }
 
-        
 
         private void OnOpenDetailViewExecute()
         {

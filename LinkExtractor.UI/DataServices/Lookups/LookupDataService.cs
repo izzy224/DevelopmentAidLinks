@@ -59,5 +59,16 @@ namespace LinkExtractor.UI.DataServices.Lookups
                     }).ToListAsync();
             }
         }
+
+        public async Task<LookupItem> GetWorkshiftLookupByDateAsync(DateTime date)
+        {
+            using(var context = _contextCreator())
+            {
+                return await context.Workshifts.AsNoTracking().Where(e => e.Date == date)
+                    .Select(e => new LookupItem { Id = e.Id, DisplayMember = e.Date.ToShortDateString() })
+                    .FirstOrDefaultAsync();
+            }
+        }
+
     }
 }

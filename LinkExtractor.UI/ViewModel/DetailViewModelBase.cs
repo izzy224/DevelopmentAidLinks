@@ -23,7 +23,7 @@ namespace LinkExtractor.UI.ViewModel
             DeleteCommand = new DelegateCommand(OnDeleteExecute);
         }
 
-        public abstract Task LoadAsync(int? id);
+        public abstract Task LoadAsync(int? id, string data);
 
         public ICommand SaveCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }

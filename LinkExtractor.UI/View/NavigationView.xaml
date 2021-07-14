@@ -48,10 +48,15 @@
             </ScrollViewer>
         </GroupBox>
         <GroupBox Header="Workshifts" Grid.Row="1">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <!--<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Workshifts}" ItemContainerStyle="{StaticResource NavigationItemContainerStyle}"
                               ItemTemplate="{StaticResource NavigationItemTemplate}"/>
-            </ScrollViewer>
+            </ScrollViewer>-->
+            <StackPanel>
+                <DatePicker SelectedDate="{Binding SelectedDate, Mode=TwoWay}" 
+                            Text="{Binding SelectedDate, Mode=TwoWay}"></DatePicker>
+                <Button Command="{Binding ChangeWorkshiftCommand}">Open Workshift</Button>
+            </StackPanel>
         </GroupBox>
     </Grid>
 </UserControl>

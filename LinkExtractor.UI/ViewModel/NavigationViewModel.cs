@@ -2,6 +2,7 @@
 using LinkExtractor.UI.DataServices;
 using LinkExtractor.UI.DataServices.Lookups;
 using LinkExtractor.UI.Events;
+using Prism.Commands;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace LinkExtractor.UI.ViewModel
 {
@@ -17,6 +19,7 @@ namespace LinkExtractor.UI.ViewModel
         private IEmployeeLookupDataService _employeeLookupService;
         private IEventAggregator _eventAggregator;
         private IWorkshiftLookupDataService _workshiftLookupService;
+        private DateTime _selectedDate;
 
         public NavigationViewModel(IEmployeeLookupDataService employeeLookupService, IWorkshiftLookupDataService workshiftLookupService,
             IEventAggregator eventAggregator)
@@ -25,12 +28,18 @@ namespace LinkExtractor.UI.ViewModel
             _eventAggregator = eventAggregator;
             _workshiftLookupService = workshiftLookupService;
             Employees = new ObservableCollection<NavigationItemViewModel>();
-            Workshifts = new ObservableCollection<NavigationItemViewModel>();
+            Workshift = new NavigationItemViewModel(0, "", _eventAggregator, nameof(WorkshiftDetailViewModel));
+            _selectedDate = DateTime.Today;
             _eventAggregator.GetEvent<DetailSavedEvent>().Subscribe(DetailSaved);
             _eventAggregator.GetEvent<DetailDeletedEvent>().Subscribe(DetailDeleted);
+            ChangeWorkshiftCommand = new DelegateCommand(OnChangeWorkshiftExecute);
         }
 
-
+        private void OnChangeWorkshiftExecute()
+        {
+            _eventAggregator.GetEvent<OpenDetailViewEvent>()
+                .Publish(new OpenDetailViewEventArgs() { Id = Workshift.Id, ViewModelName = nameof(WorkshiftDetailViewModel),Data = Workshift.DisplayMember});
+        }
 
         public async Task LoadAsync()
         {
@@ -41,16 +50,40 @@ namespace LinkExtractor.UI.ViewModel
                 Employees.Add(new NavigationItemViewModel(item.Id, item.DisplayMember, _eventAggregator, nameof(EmployeeDetailViewModel)));
             }
 
-            lookup = await _workshiftLookupService.GetWorkshiftLookupAsync();
-            Workshifts.Clear();
-            foreach (var item in lookup)
-            {
-                Workshifts.Add(new NavigationItemViewModel(item.Id, item.DisplayMember, _eventAggregator, nameof(WorkshiftDetailViewModel)));
-            }
+            UpdateWorkshift();
+
+
+            //lookup = await _workshiftLookupService.GetWorkshiftLookupAsync();
+            //Workshifts.Clear();
+            //foreach (var item in lookup)
+            //{
+            //    Workshifts.Add(new NavigationItemViewModel(item.Id, item.DisplayMember, _eventAggregator, nameof(WorkshiftDetailViewModel)));
+            //}
+        }
+
+        private async void UpdateWorkshift()
+        {
+            var workshiftLookup = await _workshiftLookupService.GetWorkshiftLookupByDateAsync(SelectedDate);
+
+            if (workshiftLookup != null)
+                Workshift = new NavigationItemViewModel(workshiftLookup.Id, workshiftLookup.DisplayMember, _eventAggregator, nameof(WorkshiftDetailViewModel));
+            else
+                Workshift = new NavigationItemViewModel(0, SelectedDate.ToShortDateString(), _eventAggregator, nameof(WorkshiftDetailViewModel));
         }
 
         public ObservableCollection<NavigationItemViewModel> Employees { get; }
-        public ObservableCollection<NavigationItemViewModel> Workshifts { get; }
+        public NavigationItemViewModel Workshift { get; set; }
+        public ICommand ChangeWorkshiftCommand { get; } 
+        
+        public DateTime SelectedDate 
+        {
+            get { return _selectedDate; }
+            set 
+            { 
+                _selectedDate = value;
+                UpdateWorkshift();
+            }
+        }
 
         private void DetailDeleted(DetailDeletedEventArgs args)
         {
@@ -58,9 +91,6 @@ namespace LinkExtractor.UI.ViewModel
             {
                 case nameof(EmployeeDetailViewModel):
                     DetailDeleted(Employees, args);
-                    break;
-                case nameof(WorkshiftDetailViewModel):
-                    DetailDeleted(Workshifts, args);
                     break;
 
             }
@@ -83,10 +113,6 @@ namespace LinkExtractor.UI.ViewModel
                 case nameof(EmployeeDetailViewModel):
                     DetailSaved(Employees, args);
                     break;
-                case nameof(WorkshiftDetailViewModel):
-                    DetailSaved(Workshifts, args);
-                    break;
-
             }
 
         }

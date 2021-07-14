@@ -15,5 +15,6 @@ namespace LinkExtractor.UI.Events
     {
         public int? Id { get; set; }
         public string ViewModelName { get; set; }
+        public string Data { get; set; }
     }
 }

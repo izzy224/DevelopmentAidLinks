@@ -39,7 +39,7 @@ namespace LinkExtractor.UI.ViewModel
 
 
 
-        public override async Task LoadAsync(int? employeeId)
+        public override async Task LoadAsync(int? employeeId, string data = null)
         {
             var employee = employeeId.HasValue ? await _employeeRepository.GetByIdAsync(employeeId.Value) : CreateNewEmployee();
             InitializeEmployee(employee);
