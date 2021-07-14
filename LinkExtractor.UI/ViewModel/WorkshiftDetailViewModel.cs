@@ -1,5 +1,7 @@
-﻿using LinkExtractor.Models;
+﻿using Autofac;
+using LinkExtractor.Models;
 using LinkExtractor.UI.DataServices.Repositories;
+using LinkExtractor.UI.Startup;
 using LinkExtractor.UI.View.Services;
 using LinkExtractor.UI.Wrapper;
 using Prism.Commands;
@@ -34,8 +36,9 @@ namespace LinkExtractor.UI.ViewModel
             AvailableEmployees = new ObservableCollection<Employee>();
             AddEmployeeCommand = new DelegateCommand(OnAddEmployeeExecute, OnAddEmployeeCanExecute);
             RemoveEmployeeCommand = new DelegateCommand(OnRemoveEmployeeExecute, OnRemoveEmployeeCanExecute);
+            GetTenderSingleCommand = new DelegateCommand(OnGetTenderSingleExecute, OnGetTenderSingleCanExecute);
+            GetTenderAllCommand = new DelegateCommand(OnGetTenderAllExecute, OnGetTenderAllCanExecute);
         }
-
 
 
         public WorkshiftWrapper Workshift 
@@ -51,6 +54,8 @@ namespace LinkExtractor.UI.ViewModel
         public ObservableCollection<Employee> AvailableEmployees { get; }
         public ICommand AddEmployeeCommand { get; }
         public ICommand RemoveEmployeeCommand { get; }
+        public ICommand GetTenderSingleCommand { get; }
+        public ICommand GetTenderAllCommand { get; }
 
         public Employee SelectedAvailableEmployee
         {
@@ -70,6 +75,7 @@ namespace LinkExtractor.UI.ViewModel
                 _selectedAddedEmployee = value;
                 OnPropertyChanged();
                 ((DelegateCommand)RemoveEmployeeCommand).RaiseCanExecuteChanged();
+                ((DelegateCommand)GetTenderSingleCommand).RaiseCanExecuteChanged();
             }
         }
 
@@ -102,6 +108,7 @@ namespace LinkExtractor.UI.ViewModel
             {
                 AvailableEmployees.Add(e);
             }
+            ((DelegateCommand)GetTenderAllCommand).RaiseCanExecuteChanged();
         }
 
         protected override void OnDeleteExecute()
@@ -152,6 +159,7 @@ namespace LinkExtractor.UI.ViewModel
                 }
             };
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
+            ((DelegateCommand)GetTenderAllCommand).RaiseCanExecuteChanged();
 
         }
 
@@ -166,6 +174,7 @@ namespace LinkExtractor.UI.ViewModel
             AddedEmployees.Remove(employeeToRemove);
             HasChanges = _workshiftRepository.HasChanges();
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
+            ((DelegateCommand)GetTenderAllCommand).RaiseCanExecuteChanged();
         }
 
         private bool OnRemoveEmployeeCanExecute()
@@ -187,6 +196,35 @@ namespace LinkExtractor.UI.ViewModel
             AvailableEmployees.Remove(employeeToAdd);
             HasChanges = _workshiftRepository.HasChanges();
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
+            ((DelegateCommand)GetTenderAllCommand).RaiseCanExecuteChanged();
+        }
+
+
+        private bool OnGetTenderAllCanExecute()
+        {
+            //TODO : Implement more logic!!
+            return AddedEmployees.Count>0;
+        }
+
+        private void OnGetTenderAllExecute()
+        {
+            throw new NotImplementedException();
+            //Publish an event with the data needed
+        }
+
+        private void OnGetTenderSingleExecute()
+        {
+            var bootstrapper = new Bootstrapper();
+            var container = bootstrapper.Bootstrap();
+            var tenderParser = container.Resolve<TenderParser>();
+            tenderParser.Show();
+            //Publish an event with the data needed
+        }
+
+        private bool OnGetTenderSingleCanExecute()
+        {
+            //TODO : Implement more logic!!
+            return SelectedAddedEmployee!=null;
         }
     }
 }

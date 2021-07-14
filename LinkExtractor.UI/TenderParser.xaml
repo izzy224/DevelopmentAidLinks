@@ -1,14 +1,17 @@
-﻿<Window x:Class="LinkExtractor.UI.Tender"
+﻿<Window x:Class="LinkExtractor.UI.TenderParser"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LinkExtractor.UI"
+        xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
         mc:Ignorable="d"
-        Title="Tender" Height="100" Width="100"
+        Title="TenderParser" Height="100" Width="100"
         Visibility="Hidden"
         >
     <Grid>
-        
+        <wpf:ChromiumWebBrowser x:Name="wb">
+            
+        </wpf:ChromiumWebBrowser>
     </Grid>
 </Window>

@@ -15,9 +15,6 @@ using System.Windows.Shapes;
 
 namespace LinkExtractor.UI.View
 {
-    /// <summary>
-    /// Interaction logic for WorkshiftDetailView.xaml
-    /// </summary>
     public partial class WorkshiftDetailView : UserControl
     {
         public WorkshiftDetailView()
