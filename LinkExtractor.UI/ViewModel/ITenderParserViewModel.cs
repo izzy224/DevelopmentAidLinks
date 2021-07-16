@@ -8,5 +8,6 @@ namespace LinkExtractor.UI.ViewModel
 {
     public interface ITenderParserViewModel
     {
+        void AddTenders(string html);
     }
 }

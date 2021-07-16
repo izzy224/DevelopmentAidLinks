@@ -18,5 +18,6 @@ namespace LinkExtractor.Models
         public int Id { get; set; }
         public DateTime Date { get; set; }
         public ICollection<Employee> Employees { get; set; }
+        public ICollection<Tender> Tenders { get; set; }
     }
 }

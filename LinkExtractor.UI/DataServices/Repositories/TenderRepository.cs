@@ -8,7 +8,12 @@ using System.Threading.Tasks;
 
 namespace LinkExtractor.UI.DataServices.Repositories
 {
-    public class TenderRepository : GenericRepository<Tender, LinkExtractorDbContext>
+    public class TenderRepository : GenericRepository<Tender, LinkExtractorDbContext>, ITenderRepository
     {
+        public TenderRepository(LinkExtractorDbContext context) : base(context)
+        {
+        }
+
+
     }
 }

@@ -28,5 +28,6 @@ namespace LinkExtractor.Models
         public int? TeamId { get; set; }
         public Team Team { get; set; }
         public ICollection<Workshift> Workshifts { get; set; }
+        public ICollection<Tender> Tenders { get; set; }
     }
 }

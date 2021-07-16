@@ -10,8 +10,6 @@
         Visibility="Hidden"
         >
     <Grid>
-        <wpf:ChromiumWebBrowser x:Name="wb">
-            
-        </wpf:ChromiumWebBrowser>
+        <wpf:ChromiumWebBrowser x:Name="wb" Address="{Binding Address}"/>
     </Grid>
 </Window>

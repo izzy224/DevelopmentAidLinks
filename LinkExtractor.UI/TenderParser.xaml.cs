@@ -3,7 +3,9 @@ using LinkExtractor.UI.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -33,16 +35,13 @@ namespace LinkExtractor.UI
             wb.FrameLoadEnd += new EventHandler<CefSharp.FrameLoadEndEventArgs>(wb_FrameLoadEnd);
         }
 
+        //maybe async await.. somehow
         private void TenderParser_Loaded(object sender, RoutedEventArgs e)
         {
-            //LoadAsync or something
+
             timer.Interval = new TimeSpan(0, 0, 5);
             timer.Tick += new EventHandler(timer_Tick);
-            /*CefSharp.Wpf.ChromiumWebBrowser*/
-            //wb = new
-            //CefSharp.Wpf.ChromiumWebBrowser("https://www.developmentaid.org/#!/tenders/search?statuses=3&modifiedAfter=2021-06-29");
-            wb.Address = "https://www.developmentaid.org/#!/tenders/search?statuses=3&modifiedAfter=2021-06-29";
-        
+
         }
 
         private void wb_FrameLoadEnd(object sender, FrameLoadEndEventArgs e)
@@ -53,18 +52,21 @@ namespace LinkExtractor.UI
             timer.Start();
         }
 
-        private void timer_Tick(object sender, EventArgs e)
+        private async void timer_Tick(object sender, EventArgs e)
         {
             timer.Stop();
-            string html = GetHtml();
+            var html = await GetHtml();
             MessageBox.Show(html);
+            
+            Thread t = new Thread(() => _viewModel.AddTenders(html)); ;
+            t.Start();
         }
 
-        private string GetHtml()
+        private async Task<string> GetHtml()
         {
             wb.GetBrowser().MainFrame.ViewSource();
-            Task<String> taskHtml = wb.GetBrowser().MainFrame.GetSourceAsync();
-            return taskHtml.Result;
+            string taskHtml = await wb.GetBrowser().MainFrame.GetSourceAsync();
+            return taskHtml;
         }
     }
 }

@@ -33,6 +33,7 @@ namespace LinkExtractor.UI.Startup
             builder.RegisterType<LookupDataService>().AsImplementedInterfaces();
             builder.RegisterType<EmployeeRepository>().As<IEmployeeRepository>();
             builder.RegisterType<WorkshiftRepository>().As<IWorkshiftRepository>();
+            builder.RegisterType<TenderRepository>().As<ITenderRepository>();
 
             return builder.Build();
         }

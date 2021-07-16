@@ -10,7 +10,9 @@
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.2.0" />
     <PackageReference Include="CefSharp.Wpf.NETCore" Version="91.1.211" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.34" />
     <PackageReference Include="Prism.Core" Version="8.1.97" />
+    <PackageReference Include="Spire.Doc" Version="9.7.3" />
   </ItemGroup>
 
   <ItemGroup>
