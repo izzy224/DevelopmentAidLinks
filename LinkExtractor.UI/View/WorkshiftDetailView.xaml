@@ -53,7 +53,7 @@
                 SelectedItem="{Binding SelectedAvailableEmployee}" Grid.Column="2"/>
 
             <StackPanel Grid.Row="3" Orientation="Horizontal">
-                <Button Content="Get tenders for selected" Width="100" Margin="10" Command="{Binding GetTenderSingleCommand}"/>
+                <Button Content="Get tenders for selected" Width="130" Margin="10" Command="{Binding GetTenderSingleCommand}"/>
                 <Button Content="Get all" Width="75" Margin="10" Command="{Binding GetTenderAllCommand}"/>
             </StackPanel>
         </Grid>

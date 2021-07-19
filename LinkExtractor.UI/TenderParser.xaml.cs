@@ -1,5 +1,7 @@
 ﻿using CefSharp;
+using LinkExtractor.UI.Events;
 using LinkExtractor.UI.ViewModel;
+using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,50 +25,60 @@ namespace LinkExtractor.UI
     /// </summary>
     public partial class TenderParser : Window
     {
-        ITenderParserViewModel _viewModel;
-        private System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
+        private ITenderParserViewModel _viewModel;
+        private IEventAggregator _eventAggregator;
+        public TenderRequestEventArgs Args
+        { 
+            get
+            {
+                return _args;
+            }
+            set
+            {
+                _args = value;
+                StartParse(_args);
+            }
+        }
 
-        public TenderParser(ITenderParserViewModel viewModel)
+        private TenderRequestEventArgs _args;
+
+        public TenderParser(ITenderParserViewModel viewModel, IEventAggregator eventAggregator)
         {
             InitializeComponent();
             _viewModel = viewModel;
+            _eventAggregator = eventAggregator;
             DataContext = _viewModel;
-            Loaded += TenderParser_Loaded;
-            wb.FrameLoadEnd += new EventHandler<CefSharp.FrameLoadEndEventArgs>(wb_FrameLoadEnd);
+            _eventAggregator.GetEvent<TenderRequestEvent>().Subscribe(StartParse, true);
+
+            wb.FrameLoadEnd += WebBrowserFrameLoadEnded;
+            this.Loaded += TenderParser_Loaded;
         }
 
-        //maybe async await.. somehow
         private void TenderParser_Loaded(object sender, RoutedEventArgs e)
         {
-
-            timer.Interval = new TimeSpan(0, 0, 5);
-            timer.Tick += new EventHandler(timer_Tick);
-
+            this.Visibility = Visibility.Hidden;
         }
 
-        private void wb_FrameLoadEnd(object sender, FrameLoadEndEventArgs e)
+        private async void WebBrowserFrameLoadEnded(object sender, FrameLoadEndEventArgs e)
         {
-            if (timer.IsEnabled)
-                timer.Stop();
-
-            timer.Start();
+                
+             if(e.Frame.IsMain)
+                {
+                await Task.Delay(3000);// - In case it is not loaded
+                wb.ViewSource();
+                var html = await wb.GetSourceAsync();
+                MessageBox.Show(html);
+                _viewModel.AddTenders(html);
+                }
         }
 
-        private async void timer_Tick(object sender, EventArgs e)
+        private void StartParse(TenderRequestEventArgs args)
         {
-            timer.Stop();
-            var html = await GetHtml();
-            MessageBox.Show(html);
-            
-            Thread t = new Thread(() => _viewModel.AddTenders(html)); ;
-            t.Start();
+            _viewModel.StartParse(args);
         }
 
-        private async Task<string> GetHtml()
-        {
-            wb.GetBrowser().MainFrame.ViewSource();
-            string taskHtml = await wb.GetBrowser().MainFrame.GetSourceAsync();
-            return taskHtml;
-        }
+        //TODO : Maybe turn this code async or at least multi-thread
+
+
     }
 }

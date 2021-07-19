@@ -7,5 +7,7 @@ namespace LinkExtractor.UI.DataServices.Repositories
     public interface IEmployeeRepository:IGenericRepository<Employee>
     {
         public Task<bool> HasShiftsAsync(int employeeId);
+        public Task<List<int>> GetAllIdAsync();
+        Task<List<Employee>> GetAllEmployeesAsync();
     }
 }

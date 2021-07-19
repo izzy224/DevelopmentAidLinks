@@ -15,14 +15,11 @@ namespace LinkExtractor.UI.DataServices.Repositories
         public async override Task<Workshift> GetByIdAsync(int id)
         {
             return await Context.Workshifts
-                .Include(w => w.Employees)
+                //.Include(w => w.Employees)
                 .SingleAsync(w => w.Id == id);
         }
 
-        public async Task<List<Employee>> GetAllEmployeesAsync()
-        {
-            return await Context.Set<Employee>().ToListAsync();
-        }
+
 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using LinkExtractor.DAL;
 using LinkExtractor.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,7 +13,11 @@ namespace LinkExtractor.UI.DataServices.Repositories
         public EmployeeRepository(LinkExtractorDbContext context) :base(context)
         {
         }
-        
+
+        public async Task<List<int>> GetAllIdAsync()
+        {
+            return await Context.Employees.Select(e => e.Id).ToListAsync();
+        }
 
         public override async Task<Employee> GetByIdAsync(int employeeId)
         {
@@ -21,9 +26,15 @@ namespace LinkExtractor.UI.DataServices.Repositories
 
         public async Task<bool> HasShiftsAsync(int employeeId)
         {
-            return await Context.Workshifts.AsNoTracking()
-                .Include(e => e.Employees)
-                .AnyAsync(e => e.Employees.Any(e => e.Id == employeeId));
+            return await Context.EmployeeWorkshifts.AsNoTracking()
+                //.Include(e => e.Employees)
+                //.AnyAsync(e => e.Employees.Any(e => e.Id == employeeId));
+                .AnyAsync(e => e.EmployeeId == employeeId);
+
+        }
+        public async Task<List<Employee>> GetAllEmployeesAsync()
+        {
+            return await Context.Set<Employee>().ToListAsync();
         }
     }
 }

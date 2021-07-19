@@ -7,9 +7,9 @@
         xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
         mc:Ignorable="d"
         Title="TenderParser" Height="100" Width="100"
-        Visibility="Hidden"
+        Visibility="Hidden" ShowInTaskbar="False" 
         >
     <Grid>
-        <wpf:ChromiumWebBrowser x:Name="wb" Address="{Binding Address}"/>
+        <wpf:ChromiumWebBrowser x:Name="wb" Address="{Binding Address, UpdateSourceTrigger=PropertyChanged}" Visibility="Hidden"/>
     </Grid>
 </Window>

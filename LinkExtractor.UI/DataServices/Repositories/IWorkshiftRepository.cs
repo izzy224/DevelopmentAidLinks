@@ -6,6 +6,6 @@ namespace LinkExtractor.UI.DataServices.Repositories
 {
     public interface IWorkshiftRepository : IGenericRepository<Workshift>
     {
-        Task<List<Employee>> GetAllEmployeesAsync();
+
     }
 }

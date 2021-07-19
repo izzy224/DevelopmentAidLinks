@@ -34,6 +34,7 @@ namespace LinkExtractor.UI.Startup
             builder.RegisterType<EmployeeRepository>().As<IEmployeeRepository>();
             builder.RegisterType<WorkshiftRepository>().As<IWorkshiftRepository>();
             builder.RegisterType<TenderRepository>().As<ITenderRepository>();
+            builder.RegisterType<EmployeeWorkshiftRepository>().As<IEmployeeWorkshiftRepository>();
 
             return builder.Build();
         }

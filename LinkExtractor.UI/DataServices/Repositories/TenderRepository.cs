@@ -1,5 +1,6 @@
 ﻿using LinkExtractor.DAL;
 using LinkExtractor.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,16 @@ namespace LinkExtractor.UI.DataServices.Repositories
         {
         }
 
-
+        public async Task AddListAsync(IList<Tender> tenders)
+        {
+            foreach(var tender in tenders)
+            {
+                await Context.Tenders.AddAsync(tender);
+            }
+        }
+        public async Task<bool> HasUrlAsync(string url)
+        {
+            return await Context.Tenders.AnyAsync(x => x.Url == url);
+        }
     }
 }

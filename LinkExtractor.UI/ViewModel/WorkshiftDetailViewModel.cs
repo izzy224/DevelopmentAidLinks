@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using LinkExtractor.Models;
 using LinkExtractor.UI.DataServices.Repositories;
+using LinkExtractor.UI.Events;
 using LinkExtractor.UI.Startup;
 using LinkExtractor.UI.View.Services;
 using LinkExtractor.UI.Wrapper;
@@ -19,6 +20,8 @@ namespace LinkExtractor.UI.ViewModel
     public class WorkshiftDetailViewModel : DetailViewModelBase, IWorkshiftDetailViewModel
     {
         private IWorkshiftRepository _workshiftRepository;
+        private IEmployeeRepository _employeeRepository;
+        private IEmployeeWorkshiftRepository _employeeWorkshiftRepository;
         private WorkshiftWrapper _workshift;
         private IMessageDialogService _messageDialogService;
 
@@ -28,9 +31,14 @@ namespace LinkExtractor.UI.ViewModel
 
         public WorkshiftDetailViewModel(IEventAggregator eventAggregator,
             IMessageDialogService messageDialogService,
-            IWorkshiftRepository workshiftRepository) : base(eventAggregator)
+            IWorkshiftRepository workshiftRepository,
+            IEmployeeRepository employeeRepository,
+            IEmployeeWorkshiftRepository employeeWorkshiftRepository
+            ) : base(eventAggregator)
         {
             _workshiftRepository = workshiftRepository;
+            _employeeRepository = employeeRepository;
+            _employeeWorkshiftRepository = employeeWorkshiftRepository;
             _messageDialogService = messageDialogService;
             AddedEmployees = new ObservableCollection<Employee>();
             AvailableEmployees = new ObservableCollection<Employee>();
@@ -87,15 +95,20 @@ namespace LinkExtractor.UI.ViewModel
 
             InitializeWorkshift(workshift);
 
-           _allEmployees = await _workshiftRepository.GetAllEmployeesAsync();
+           _allEmployees = await _employeeRepository.GetAllEmployeesAsync();
             SetupPicklist();
         }
 
-        private void SetupPicklist()
+        private async void SetupPicklist()
         {
-            var workshiftEmployeeIds = Workshift.Model.Employees.Select(e => e.Id).ToList();
+            //var employeeIds = await _employeeRepository.GetAllIdAsync();
+            var workshiftEmployeeIds = await _employeeWorkshiftRepository.GetEmployeesIdByWorkshiftAsync(Workshift.Id);
+            //var workshiftEmployeeIds = Workshift.Model.Employees.Select(e => e.Id).ToList();
+            //var addedEmployees = _allEmployees.Where(e => workshiftEmployeeIds.Contains(e.Id)).OrderBy(e => e.Name);
+            //var availableEmployees = _allEmployees.Except(addedEmployees).OrderBy(e => e.Name);
             var addedEmployees = _allEmployees.Where(e => workshiftEmployeeIds.Contains(e.Id)).OrderBy(e => e.Name);
             var availableEmployees = _allEmployees.Except(addedEmployees).OrderBy(e => e.Name);
+
 
             AddedEmployees.Clear();
             AvailableEmployees.Clear();
@@ -111,13 +124,14 @@ namespace LinkExtractor.UI.ViewModel
             ((DelegateCommand)GetTenderAllCommand).RaiseCanExecuteChanged();
         }
 
-        protected override void OnDeleteExecute()
+        protected async override void OnDeleteExecute()
         {
             var result = _messageDialogService.ShowOkCancelDialog($"Do you want to delete this workshift?","Confirm delete");
             if(result == MessageDialogResult.Ok)
             {
                 _workshiftRepository.Remove(Workshift.Model);
-                _workshiftRepository.SaveAsync();
+                await _workshiftRepository.SaveAsync();
+                await _employeeWorkshiftRepository.SaveAsync();
                 RaiseDetailDeletedEvent(Workshift.Id);
             }
         }
@@ -130,7 +144,8 @@ namespace LinkExtractor.UI.ViewModel
         protected override async void OnSaveExecute()
         {
             await _workshiftRepository.SaveAsync();
-            HasChanges = _workshiftRepository.HasChanges();
+            await _employeeWorkshiftRepository.SaveAsync();
+            HasChanges = _workshiftRepository.HasChanges() || _employeeWorkshiftRepository.HasChanges();
             RaiseDetailSavedEvent(Workshift.Id, Workshift.Date.ToShortDateString());
         }
 
@@ -165,20 +180,22 @@ namespace LinkExtractor.UI.ViewModel
 
 
 
-        private void OnRemoveEmployeeExecute()
+        private async void OnRemoveEmployeeExecute()
         {
             var employeeToRemove = SelectedAddedEmployee;
-
-            Workshift.Model.Employees.Remove(employeeToRemove);
+            var employeeWorkshift = await _employeeWorkshiftRepository.GetByFk(Workshift.Id, employeeToRemove.Id);
+            
+            _employeeWorkshiftRepository.Remove(employeeWorkshift);
             AvailableEmployees.Add(employeeToRemove);
             AddedEmployees.Remove(employeeToRemove);
-            HasChanges = _workshiftRepository.HasChanges();
+            HasChanges = _workshiftRepository.HasChanges() || _employeeWorkshiftRepository.HasChanges();
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
             ((DelegateCommand)GetTenderAllCommand).RaiseCanExecuteChanged();
         }
 
         private bool OnRemoveEmployeeCanExecute()
         {
+            //TODO : Check if employee has tenders
             return SelectedAddedEmployee != null;
         }
 
@@ -191,10 +208,11 @@ namespace LinkExtractor.UI.ViewModel
         {
             var employeeToAdd = SelectedAvailableEmployee;
 
-            Workshift.Model.Employees.Add(employeeToAdd);
+            _employeeWorkshiftRepository.Add(new EmployeeWorkshift() 
+            { WorkshiftId = Workshift.Id, EmployeeId = SelectedAvailableEmployee.Id });//, Employee = SelectedAvailableEmployee, Workshift = this.Workshift.Model});
             AddedEmployees.Add(employeeToAdd);
             AvailableEmployees.Remove(employeeToAdd);
-            HasChanges = _workshiftRepository.HasChanges();
+            HasChanges = _workshiftRepository.HasChanges() || _employeeWorkshiftRepository.HasChanges();
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
             ((DelegateCommand)GetTenderAllCommand).RaiseCanExecuteChanged();
         }
@@ -209,21 +227,30 @@ namespace LinkExtractor.UI.ViewModel
         private void OnGetTenderAllExecute()
         {
             throw new NotImplementedException();
-            //Publish an event with the data needed
+            //Publish an event with the data needed -- maybe an foreach for every selected employee
         }
 
-        private void OnGetTenderSingleExecute()
+        private async void OnGetTenderSingleExecute()
         {
             var bootstrapper = new Bootstrapper();
             var container = bootstrapper.Bootstrap();
             var tenderParser = container.Resolve<TenderParser>();
-            tenderParser.Show();
-            //Publish an event with the data needed
+            var employeeWorkshift = await _employeeWorkshiftRepository.GetByFk(Workshift.Id, SelectedAddedEmployee.Id);
+            
+            if(!tenderParser.IsActive)
+            {
+                tenderParser.Show();
+                tenderParser.Args = new TenderRequestEventArgs() { Id = employeeWorkshift.Id, Quantity = 30, 
+                    FileName = SelectedAddedEmployee.Name+" "+ SelectedAddedEmployee.Surname +" "+ Workshift.Date.ToShortDateString().Replace('/','.')};
+                //EventAggregator.GetEvent<TenderRequestEvent>().Publish(new TenderRequestEventArgs() { Id = employeeWorkshift.Id, Quantity = 30 });
+            }
+
+
         }
 
         private bool OnGetTenderSingleCanExecute()
         {
-            //TODO : Implement more logic!!
+            //TODO : Implement more logic!! Check if 
             return SelectedAddedEmployee!=null;
         }
     }

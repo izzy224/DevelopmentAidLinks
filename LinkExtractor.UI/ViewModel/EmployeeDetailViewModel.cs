@@ -23,7 +23,6 @@ namespace LinkExtractor.UI.ViewModel
         private IMessageDialogService _messageDialogService;
         private ITeamsLookupDataService _teamsLookupDataService;
         private EmployeeWrapper _employee;
-        private bool _hasChanges;
 
         public EmployeeDetailViewModel(IEmployeeRepository employeeRepository,
             IEventAggregator eventAggregator,

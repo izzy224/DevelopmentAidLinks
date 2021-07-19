@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LinkExtractor.UI.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,5 +10,6 @@ namespace LinkExtractor.UI.ViewModel
     public interface ITenderParserViewModel
     {
         void AddTenders(string html);
+        void StartParse(TenderRequestEventArgs args);
     }
 }

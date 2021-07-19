@@ -16,7 +16,7 @@ namespace LinkExtractor.UI.DataServices.Repositories
         }
 
         
-
+        // TODO : Turn async
         public void Add(TEntity model)
         {
             Context.Set<TEntity>().Add(model);

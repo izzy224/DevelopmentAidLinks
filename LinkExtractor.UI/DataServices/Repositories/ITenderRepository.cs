@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace LinkExtractor.UI.DataServices.Repositories
 {
-    public interface ITenderRepository
+    public interface ITenderRepository : IGenericRepository<Tender>
     {
-
+        Task AddListAsync(IList<Tender> tenders);
+        Task<bool> HasUrlAsync(string url);
     }
 }
