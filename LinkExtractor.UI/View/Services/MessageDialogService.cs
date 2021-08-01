@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,15 +11,16 @@ namespace LinkExtractor.UI.View.Services
 {
     public class MessageDialogService : IMessageDialogService
     {
-        public void ShowInfoDialog(string text)
+        private MetroWindow MetroWindow { get { return (MetroWindow)App.Current.MainWindow; } }
+        public async Task ShowInfoDialogAsync(string text)
         {
-            MessageBox.Show(text);
+            await MetroWindow.ShowMessageAsync("Info",text);
         }
 
-        public MessageDialogResult ShowOkCancelDialog(string text, string title)
+        public async Task<MessageDialogResult> ShowOkCancelDialogAsync(string text, string title)
         {
-            var res = MessageBox.Show(text, title, MessageBoxButton.OKCancel);
-            return res == MessageBoxResult.OK ? MessageDialogResult.Ok : MessageDialogResult.Cancel;
+            var res = await MetroWindow.ShowMessageAsync(title, text, MessageDialogStyle.AffirmativeAndNegative);
+            return res == MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative ? MessageDialogResult.Ok : MessageDialogResult.Cancel;
         }
     }
     public enum MessageDialogResult

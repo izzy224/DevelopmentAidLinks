@@ -4,14 +4,16 @@ using LinkExtractor.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LinkExtractor.DAL.Migrations
 {
     [DbContext(typeof(LinkExtractorDbContext))]
-    partial class LinkExtractorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210710191222_AddedEmployeeWorkshifts")]
+    partial class AddedEmployeeWorkshifts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,27 +92,6 @@ namespace LinkExtractor.DAL.Migrations
                     b.ToTable("Teams");
                 });
 
-            modelBuilder.Entity("LinkExtractor.Models.Tender", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("EmployeeWorkshiftId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Url")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeWorkshiftId");
-
-                    b.ToTable("Tenders");
-                });
-
             modelBuilder.Entity("LinkExtractor.Models.Workshift", b =>
                 {
                     b.Property<int>("Id")
@@ -137,42 +118,22 @@ namespace LinkExtractor.DAL.Migrations
 
             modelBuilder.Entity("LinkExtractor.Models.EmployeeWorkshift", b =>
                 {
-                    b.HasOne("LinkExtractor.Models.Employee", "Employee")
+                    b.HasOne("LinkExtractor.Models.Employee", null)
                         .WithMany("EmployeeWorkshifts")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LinkExtractor.Models.Workshift", "Workshift")
+                    b.HasOne("LinkExtractor.Models.Workshift", null)
                         .WithMany("EmployeeWorkshifts")
                         .HasForeignKey("WorkshiftId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Employee");
-
-                    b.Navigation("Workshift");
-                });
-
-            modelBuilder.Entity("LinkExtractor.Models.Tender", b =>
-                {
-                    b.HasOne("LinkExtractor.Models.EmployeeWorkshift", "EmployeeWorkshift")
-                        .WithMany("Tenders")
-                        .HasForeignKey("EmployeeWorkshiftId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EmployeeWorkshift");
                 });
 
             modelBuilder.Entity("LinkExtractor.Models.Employee", b =>
                 {
                     b.Navigation("EmployeeWorkshifts");
-                });
-
-            modelBuilder.Entity("LinkExtractor.Models.EmployeeWorkshift", b =>
-                {
-                    b.Navigation("Tenders");
                 });
 
             modelBuilder.Entity("LinkExtractor.Models.Workshift", b =>

@@ -111,11 +111,11 @@ namespace LinkExtractor.UI.ViewModel
         {
             if (await _employeeRepository.HasShiftsAsync(Employee.Id))
             {
-                _messageDialogService.ShowInfoDialog($"{Employee.Name} {Employee.Surname} can't be deleted as he is involved in shifts");
+                await _messageDialogService.ShowInfoDialogAsync($"{Employee.Name} {Employee.Surname} can't be deleted as he is involved in shifts");
                 return;
             }
 
-            var res = _messageDialogService.ShowOkCancelDialog($"Are you sure you want to delete the employee {Employee.Name} {Employee.Surname}", "Confirmation dialog");
+            var res = await _messageDialogService.ShowOkCancelDialogAsync($"Are you sure you want to delete the employee {Employee.Name} {Employee.Surname}", "Confirmation dialog");
             if (res == MessageDialogResult.Ok)
             {
                 _employeeRepository.Remove(Employee.Model);

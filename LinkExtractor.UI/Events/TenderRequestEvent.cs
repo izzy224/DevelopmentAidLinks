@@ -16,6 +16,8 @@ namespace LinkExtractor.UI.Events
         public int Id { get; set; }
         public int Quantity { get; set; }
         public string FileName { get; set; }
+        public string Email { get; set; }
+        public string DateFrom { get; set; }
         //Maybe later add filters
     }
 }

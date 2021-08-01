@@ -32,6 +32,7 @@ namespace LinkExtractor.UI.DataServices.Repositories
             return Context.ChangeTracker.HasChanges();
         }
 
+
         public void Remove(TEntity model)
         {
             Context.Set<TEntity>().Remove(model);

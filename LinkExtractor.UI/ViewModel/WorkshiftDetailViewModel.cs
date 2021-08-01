@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace LinkExtractor.UI.ViewModel
@@ -28,6 +29,7 @@ namespace LinkExtractor.UI.ViewModel
         private Employee _selectedAvailableEmployee;
         private Employee _selectedAddedEmployee;
         private List<Employee> _allEmployees;
+        private DateTime _dateFrom;
 
         public WorkshiftDetailViewModel(IEventAggregator eventAggregator,
             IMessageDialogService messageDialogService,
@@ -46,6 +48,7 @@ namespace LinkExtractor.UI.ViewModel
             RemoveEmployeeCommand = new DelegateCommand(OnRemoveEmployeeExecute, OnRemoveEmployeeCanExecute);
             GetTenderSingleCommand = new DelegateCommand(OnGetTenderSingleExecute, OnGetTenderSingleCanExecute);
             GetTenderAllCommand = new DelegateCommand(OnGetTenderAllExecute, OnGetTenderAllCanExecute);
+            _dateFrom = DateTime.Today;
         }
 
 
@@ -84,6 +87,14 @@ namespace LinkExtractor.UI.ViewModel
                 OnPropertyChanged();
                 ((DelegateCommand)RemoveEmployeeCommand).RaiseCanExecuteChanged();
                 ((DelegateCommand)GetTenderSingleCommand).RaiseCanExecuteChanged();
+            }
+        }
+        public DateTime DateFrom
+        {
+            get { return _dateFrom; }
+            set 
+            {
+                _dateFrom = value;
             }
         }
 
@@ -126,7 +137,7 @@ namespace LinkExtractor.UI.ViewModel
 
         protected async override void OnDeleteExecute()
         {
-            var result = _messageDialogService.ShowOkCancelDialog($"Do you want to delete this workshift?","Confirm delete");
+            var result = await _messageDialogService.ShowOkCancelDialogAsync($"Do you want to delete this workshift?","Confirm delete");
             if(result == MessageDialogResult.Ok)
             {
                 _workshiftRepository.Remove(Workshift.Model);
@@ -138,15 +149,17 @@ namespace LinkExtractor.UI.ViewModel
 
         protected override bool OnSaveCanExecute()
         {
-            return Workshift != null && !Workshift.HasErrors && HasChanges;
+            return Workshift != null && !Workshift.HasErrors && (HasChanges || Workshift.Id==0);
         }
 
         protected override async void OnSaveExecute()
         {
             await _workshiftRepository.SaveAsync();
             await _employeeWorkshiftRepository.SaveAsync();
+
             HasChanges = _workshiftRepository.HasChanges() || _employeeWorkshiftRepository.HasChanges();
-            RaiseDetailSavedEvent(Workshift.Id, Workshift.Date.ToShortDateString());
+            //RaiseDetailSavedEvent(Workshift.Id, Workshift.Date.ToShortDateString());
+            ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
         }
 
         private Workshift CreateNewWorkshift(string data)
@@ -201,7 +214,7 @@ namespace LinkExtractor.UI.ViewModel
 
         private bool OnAddEmployeeCanExecute()
         {
-            return SelectedAvailableEmployee != null;
+            return SelectedAvailableEmployee != null && Workshift.Id != 0;
         }
 
         private void OnAddEmployeeExecute()
@@ -240,18 +253,19 @@ namespace LinkExtractor.UI.ViewModel
             if(!tenderParser.IsActive)
             {
                 tenderParser.Show();
-                tenderParser.Args = new TenderRequestEventArgs() { Id = employeeWorkshift.Id, Quantity = 30, 
-                    FileName = SelectedAddedEmployee.Name+" "+ SelectedAddedEmployee.Surname +" "+ Workshift.Date.ToShortDateString().Replace('/','.')};
+                tenderParser.Args = new TenderRequestEventArgs() { Id = employeeWorkshift.Id, Quantity = 30,
+                    FileName = SelectedAddedEmployee.Name + " " + SelectedAddedEmployee.Surname + " " + Workshift.Date.ToShortDateString().Replace('/', '.'),
+                    Email = SelectedAddedEmployee.Email, DateFrom = DateFrom.ToString("yyyy-MM-dd")
+                };
                 //EventAggregator.GetEvent<TenderRequestEvent>().Publish(new TenderRequestEventArgs() { Id = employeeWorkshift.Id, Quantity = 30 });
             }
-
 
         }
 
         private bool OnGetTenderSingleCanExecute()
         {
             //TODO : Implement more logic!! Check if 
-            return SelectedAddedEmployee!=null;
+            return SelectedAddedEmployee!=null && !HasChanges;
         }
     }
 }

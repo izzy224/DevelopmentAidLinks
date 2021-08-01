@@ -1,9 +1,12 @@
 ﻿using LinkExtractor.UI.ViewModel;
+using MahApps.Metro.Controls;
+using System.Drawing;
 using System.Windows;
+using System.Windows.Media;
 
 namespace LinkExtractor.UI
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : MetroWindow
     {
         private MainViewModel _viewModel;
 

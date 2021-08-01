@@ -10,6 +10,8 @@ using LinkExtractor.Models;
 using LinkExtractor.UI.Events;
 using System.Threading.Tasks;
 using Prism.Events;
+using System.Net.Mail;
+using System.Net;
 
 namespace LinkExtractor.UI.ViewModel
 {
@@ -21,14 +23,14 @@ namespace LinkExtractor.UI.ViewModel
         private List<Tender> Tenders;
         private int _requestedQuantity;
         private string _fileName;
-
-
+        private string _mail;
+        private string _dateFrom;
 
         public TenderParserViewModel(ITenderRepository tenderRepository)
         {
             _tenderRepository = tenderRepository;
             Tenders = new List<Tender>();
-            Address = "https://www.developmentaid.org/#!/tenders/search?statuses=3&modifiedAfter=2021-06-29";
+            //Address = "https://www.developmentaid.org/#!/tenders/search?statuses=3&modifiedAfter=2021-06-29";
         }
 
 
@@ -60,7 +62,6 @@ namespace LinkExtractor.UI.ViewModel
 
             var htmlTenders = htmlDoc.DocumentNode.SelectNodes("//*[@class=\"search-card__title ng-binding ng-scope\"]").ToList();
             var urlList = new List<string>();
-
             foreach (var htmlTender in htmlTenders)
             {
                 urlList.Add(htmlTender.Attributes["ng-href"].Value);
@@ -99,7 +100,30 @@ namespace LinkExtractor.UI.ViewModel
                     para.AppendText("https://www.developmentaid.org/"+url+'\n');
                 }
                 doc.SaveToFile(@$"D:\DevelopmentAid\{_fileName}.docx", FileFormat.Docx);
+
                 //TODO : Add path from json file, also implement the menu item for choosing the path
+                //TODO : Maybe execute a script from powershell - - -
+                
+                //using(MailMessage message = new MailMessage())
+                //{
+                //    using(SmtpClient smtp = new SmtpClient())
+                //    {
+                //        message.From = new MailAddress("linktogo365@gmail.com");
+                //        message.To.Add(new MailAddress(_mail));
+                //        System.Net.Mime.ContentType contentType = new System.Net.Mime.ContentType();
+                //        contentType.MediaType = System.Net.Mime.MediaTypeNames.Application.Octet;
+                //        contentType.Name = _fileName+".docx";
+                //        message.Attachments.Add(new Attachment(@$"D:\DevelopmentAid\{_fileName}.docx", contentType));  //TODO : Path from json file
+                //        message.Subject = "Today's tenders";
+                //        smtp.Port = 587;
+                //        smtp.Host = "smtp.gmail.com";
+                //        smtp.EnableSsl = true;
+                //        smtp.UseDefaultCredentials = false;
+                //        smtp.Credentials = new NetworkCredential("linktogo365@gmail.com", "Linktogoapp@@");
+                //        smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+                //        smtp.Send(message);
+                //    }
+                //}
             }
         }
 
@@ -108,6 +132,9 @@ namespace LinkExtractor.UI.ViewModel
             EmployeeWorkshiftId = args.Id;
             _requestedQuantity = args.Quantity;
             _fileName = args.FileName;
+            _mail = args.Email;
+            _dateFrom = args.DateFrom;
+            Address = @$"https://www.developmentaid.org/#!/tenders/search?statuses=3&modifiedAfter={_dateFrom}";
         }
     }
 }

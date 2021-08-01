@@ -1,4 +1,4 @@
-﻿<Window x:Class="LinkExtractor.UI.MainWindow"
+﻿<Controls:MetroWindow x:Class="LinkExtractor.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,8 +6,10 @@
         xmlns:local="clr-namespace:LinkExtractor.UI"
         xmlns:view="clr-namespace:LinkExtractor.UI.View"
         xmlns:viewModel="clr-namespace:LinkExtractor.UI.ViewModel"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Link Extractor" Height="450" Width="800">
+        Title="LinkToGo" Height="720" Width="1280">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewModel:EmployeeDetailViewModel}">
             <view:EmployeeDetailView/>
@@ -29,8 +31,8 @@
             <MenuItem Header="Create">
                 <MenuItem Header="Add Employee" Command="{Binding CreateNewDetailCommand}"
                     CommandParameter="{x:Type viewModel:EmployeeDetailViewModel}"/>
-                <MenuItem Header="Add Workshift" Command="{Binding CreateNewDetailCommand}"
-                    CommandParameter="{x:Type viewModel:WorkshiftDetailViewModel}"/>
+                <!--<MenuItem Header="Add Workshift" Command="{Binding CreateNewDetailCommand}"
+                    CommandParameter="{x:Type viewModel:WorkshiftDetailViewModel}"/>-->
             </MenuItem>
         </Menu>
         <view:NavigationView Grid.Row="1" DataContext="{Binding NavigationViewModel}" />
@@ -38,4 +40,4 @@
 
         
     </Grid>
-</Window>
+</Controls:MetroWindow>

@@ -10,6 +10,8 @@ namespace LinkExtractor.DAL
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<Workshift> Workshifts { get; set; }
+        public DbSet<Tender> Tenders { get; set; }
+        public DbSet<EmployeeWorkshift> EmployeeWorkshifts { get; set; }
         public LinkExtractorDbContext() : base() { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -24,7 +26,7 @@ namespace LinkExtractor.DAL
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json").Build();
-            //Real file path - D:\DevelopmentAid\DevelopmentAidLinks\LinkExtractor.DAL\bin\Debug\net5.0
+            //Real file path - D:\DevelopmentAid\DevelopmentAidLinks\LinkExtractor.UI\bin\x64\Debug\net5.0-windows
             optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
         }
     }

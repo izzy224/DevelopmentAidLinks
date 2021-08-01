@@ -57,7 +57,7 @@ namespace LinkExtractor.UI.ViewModel
         {
             if(DetailViewModel!=null && DetailViewModel.HasChanges)
             {
-                var res = _messageDialogService.ShowOkCancelDialog("Changes have been made. Navigate away?", "Question");
+                var res = await _messageDialogService.ShowOkCancelDialogAsync("Changes have been made. Navigate away?", "Question");
 
                 if (res == MessageDialogResult.Cancel)
                 {
