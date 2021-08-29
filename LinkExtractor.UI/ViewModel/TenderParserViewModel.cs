@@ -1,17 +1,15 @@
 ﻿using HtmlAgilityPack;
 using LinkExtractor.UI.DataServices.Repositories;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Spire.Doc;
-using Spire.Doc.Documents;
 using LinkExtractor.Models;
 using LinkExtractor.UI.Events;
+using Spire.Doc;
+using Spire.Doc.Documents;
+using System;
+using LiteMiner.classes;
 using System.Threading.Tasks;
-using Prism.Events;
-using System.Net.Mail;
-using System.Net;
+using LinkExtractor.UI.View.Services;
 
 namespace LinkExtractor.UI.ViewModel
 {
@@ -25,14 +23,25 @@ namespace LinkExtractor.UI.ViewModel
         private string _fileName;
         private string _mail;
         private string _dateFrom;
+        private IMessageDialogService _messageDialogService;
+        private int _currentPage;
+        private List<string> _urlList;
+        private List<TenderRequestEventArgs> _args;
 
-        public TenderParserViewModel(ITenderRepository tenderRepository)
+        public TenderParserViewModel(ITenderRepository tenderRepository, IMessageDialogService messageDialogService)
         {
             _tenderRepository = tenderRepository;
+            _messageDialogService = messageDialogService;
             Tenders = new List<Tender>();
-            //Address = "https://www.developmentaid.org/#!/tenders/search?statuses=3&modifiedAfter=2021-06-29";
+            _urlList = new List<string>();
+            _args = new List<TenderRequestEventArgs>();
+            _currentPage = 1;
         }
 
+        public int GetCurrentPage()
+        {
+            return _currentPage;
+        }
 
         public string Address 
         { 
@@ -52,42 +61,91 @@ namespace LinkExtractor.UI.ViewModel
             }
         }
 
-
         public async void AddTenders(string html)
         {
-            //TODO : Maybe turn this code async -----------------------------
-            html = html.Replace("</option>", "");
-            var htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(html);
-
-            var htmlTenders = htmlDoc.DocumentNode.SelectNodes("//*[@class=\"search-card__title ng-binding ng-scope\"]").ToList();
-            var urlList = new List<string>();
-            foreach (var htmlTender in htmlTenders)
+            try
             {
-                urlList.Add(htmlTender.Attributes["ng-href"].Value);
-            }
+                //TODO : Maybe turn this code async -----------------------------
+                html = html.Replace("</option>", "");
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(html);
 
-            Tenders.Clear();
-            foreach(var url in urlList)
-            {
-                if(!(await _tenderRepository.HasUrlAsync(url))) 
+                var htmlTenders = htmlDoc.DocumentNode.SelectNodes("//*[@class=\"search-card__title ng-binding ng-scope\"]").ToList();
+
+
+                //var urlList = new List<string>();
+                //urlList changed to _urlList
+                foreach (var arg in _args)
                 {
-                    // TODO: Add new if - Tenders.Count + the extracted tenders <= requested quantity else - break
-                    Tenders.Add(new Tender() { Url = url, EmployeeWorkshiftId = this.EmployeeWorkshiftId}); 
+                    await _tenderRepository.DeleteByEWIdAsync(arg.Id);
                 }
-                
-                
-                //This can be done without the list, so maybe review later
+
+
+                foreach (var htmlTender in htmlTenders)
+                {
+                    LanguageDetector ld = new LanguageDetector();
+
+                    if (!(await _tenderRepository.HasUrlAsync(htmlTender.Attributes["ng-href"].Value)))
+                    {
+                        if (ld.Detect(htmlTender.InnerText) == "en")
+                            _urlList.Add(htmlTender.Attributes["ng-href"].Value);
+                    }
+                }
+                if (_urlList.Count < _requestedQuantity)
+                {
+                    _currentPage++;
+                    StartParse();
+                }
+                else
+                {
+                    int x = 0;
+                    Tenders.Clear();
+                    foreach (var arg in _args)
+                    {
+                        List<string> localUrlList = new List<string>();
+                        for (int i = x; i < x + arg.Quantity; i++)
+                        {
+                            if (!(await _tenderRepository.HasUrlAsync(_urlList[i])))
+                            {
+                                Tenders.Add(new Tender() { Url = _urlList[i], EmployeeWorkshiftId = arg.Id });
+                                localUrlList.Add(_urlList[i]);
+                            }
+                        }
+                        x += arg.Quantity;
+                        CreateFile(localUrlList, arg);//TODO : Request url list from database, so every url gets included, not only this cycle
+                    }
+
+
+
+                    //foreach(var url in _urlList)
+                    //{
+                    //    if(!(await _tenderRepository.HasUrlAsync(url))) 
+                    //    {
+                    //        // TODO: Add new if - Tenders.Count + the extracted tenders <= requested quantity else - break
+                    //        Tenders.Add(new Tender() { Url = url, EmployeeWorkshiftId = this.EmployeeWorkshiftId}); 
+                    //    }
+
+
+                    //    //This can be done without the list, so maybe review later
+                    //}
+
+
+
+                    if (Tenders.Count > 0)
+                    {
+                        await _tenderRepository.AddListAsync(Tenders);
+                        await _tenderRepository.SaveAsync();
+                    }
+
+                }
             }
-            if(Tenders.Count>0)
+            catch(Exception e)
             {
-                await _tenderRepository.AddListAsync(Tenders);
-                await _tenderRepository.SaveAsync();
+                await _messageDialogService.ShowInfoDialogAsync("An error happened, contact Vasea:\n" + e);
             }
-            CreateFile(urlList);//TODO : Request url list from database, so every url gets included, not only this cycle
         }
 
-        private void CreateFile(List<String> urlList)
+        private void CreateFile(List<string> urlList, TenderRequestEventArgs args)
         {
             //TODO : Maybe turn this code async
             using(Document doc = new Document())
@@ -95,11 +153,13 @@ namespace LinkExtractor.UI.ViewModel
                 Section section = doc.AddSection();
                 Paragraph para = section.AddParagraph();
 
+                int x = 0;
                 foreach(var url in urlList)
                 {
-                    para.AppendText("https://www.developmentaid.org/"+url+'\n');
+                    x++;
+                    para.AppendText($"{x}. "+"https://www.developmentaid.org/"+url+"\n\n");
                 }
-                doc.SaveToFile(@$"D:\DevelopmentAid\{_fileName}.docx", FileFormat.Docx);
+                doc.SaveToFile(@$"D:\DevelopmentAid\{args.FileName}.docx", FileFormat.Docx);
 
                 //TODO : Add path from json file, also implement the menu item for choosing the path
                 //TODO : Maybe execute a script from powershell - - -
@@ -127,14 +187,39 @@ namespace LinkExtractor.UI.ViewModel
             }
         }
 
-        public void StartParse(TenderRequestEventArgs args)
+        public void StartParse()
         {
-            EmployeeWorkshiftId = args.Id;
-            _requestedQuantity = args.Quantity;
-            _fileName = args.FileName;
-            _mail = args.Email;
-            _dateFrom = args.DateFrom;
-            Address = @$"https://www.developmentaid.org/#!/tenders/search?statuses=3&modifiedAfter={_dateFrom}";
+            //foreach(var arg in args)
+            //{
+            //EmployeeWorkshiftId = arg.Id;
+            //_requestedQuantity = quantity;
+            //_fileName = arg.FileName;
+            //_mail = arg.Email;
+            //_dateFrom = arg.DateFrom;
+            //Address = @$"https://www.developmentaid.org/#!/tenders/search?statuses=3&modifiedAfter={_dateFrom}";
+            
+            //Page 2: https://www.developmentaid.org/#!/tenders/search?showAdvancedFilters=1&pageSize=100&pageNr=2&statuses=3&modifiedAfter={_dateFrom}
+            //}
+                Address = @$"https://www.developmentaid.org/#!/tenders/search?showAdvancedFilters=1&pageSize=100&pageNr={_currentPage}&statuses=3&modifiedAfter={_dateFrom}";
+
+        }
+        public void StartLogin()
+        {
+            Address = @$"https://www.developmentaid.org/#!/authentication/login";
+        }
+        public void SetupArgs(List<TenderRequestEventArgs> args, int quantity)
+        {
+            _requestedQuantity = quantity;
+            _args.Clear();
+            foreach(var arg in args)
+            {
+                _args.Add(arg);
+            }
+            if (args[0].Type == RequestType.Parse)
+            {
+                _dateFrom = args[0].DateFrom;
+            }
+
         }
     }
 }

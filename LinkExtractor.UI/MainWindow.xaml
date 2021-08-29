@@ -34,6 +34,7 @@
                 <!--<MenuItem Header="Add Workshift" Command="{Binding CreateNewDetailCommand}"
                     CommandParameter="{x:Type viewModel:WorkshiftDetailViewModel}"/>-->
             </MenuItem>
+            <MenuItem Header="Login" Command="{Binding LoginCommand}"></MenuItem>
         </Menu>
         <view:NavigationView Grid.Row="1" DataContext="{Binding NavigationViewModel}" />
         <ContentControl Grid.Row="1" Grid.Column="1" Content="{Binding DetailViewModel}"/>

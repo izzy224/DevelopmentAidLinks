@@ -29,5 +29,6 @@ namespace LinkExtractor.UI.DataServices.Repositories
                 .Where(e => e.EmployeeId == employeeId && e.WorkshiftId == workshiftId)
                 .FirstOrDefaultAsync();
         }
+
     }
 }

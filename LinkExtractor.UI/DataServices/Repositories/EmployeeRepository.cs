@@ -36,6 +36,11 @@ namespace LinkExtractor.UI.DataServices.Repositories
         {
             return await Context.Set<Employee>().ToListAsync();
         }
+        public async Task<int> GetQuantityAsync(int id)
+        {
+            var x = await Context.Employees.Where(x => x.Id == id).ToListAsync();
+            return x.FirstOrDefault().Quantity;
+        }
     }
 }
 

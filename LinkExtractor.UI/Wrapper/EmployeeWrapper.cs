@@ -14,6 +14,8 @@ namespace LinkExtractor.UI.Wrapper
 
         }
 
+
+
         public int Id { get { return Model.Id; } }
 
         public string Name
@@ -45,6 +47,14 @@ namespace LinkExtractor.UI.Wrapper
         public string Email
         {
             get { return GetValue<string>(); }
+            set
+            {
+                SetValue(value);
+            }
+        }
+        public int Quantity
+        {
+            get { return GetValue<int>(); }
             set
             {
                 SetValue(value);

@@ -26,5 +26,17 @@ namespace LinkExtractor.UI.DataServices.Repositories
         {
             return await Context.Tenders.AnyAsync(x => x.Url == url);
         }
+        public async Task DeleteByEWIdAsync(int employeeWorkshiftId)
+        {
+            var tenders = await Context.Tenders.Where(x => x.EmployeeWorkshiftId == employeeWorkshiftId).ToListAsync();
+            if (tenders.Count>0)
+            {
+                foreach(var t in tenders)
+                {
+                    Remove(t);
+                }
+            }
+            await Context.SaveChangesAsync();
+        }
     }
 }

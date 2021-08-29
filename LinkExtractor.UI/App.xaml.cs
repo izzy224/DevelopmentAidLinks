@@ -30,5 +30,6 @@ namespace LinkExtractor.UI
             MessageBox.Show("Unexpected error occured" + Environment.NewLine + e.Exception.Message, "Unexpected error");
             e.Handled = true;
         }
+
     }
 }

@@ -11,5 +11,6 @@ namespace LinkExtractor.UI.DataServices.Repositories
     {
         Task AddListAsync(IList<Tender> tenders);
         Task<bool> HasUrlAsync(string url);
+        Task DeleteByEWIdAsync(int employeeWorkshiftId);
     }
 }

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -237,10 +238,35 @@ namespace LinkExtractor.UI.ViewModel
             return AddedEmployees.Count>0;
         }
 
-        private void OnGetTenderAllExecute()
+        private async void OnGetTenderAllExecute()
         {
-            throw new NotImplementedException();
-            //Publish an event with the data needed -- maybe an foreach for every selected employee
+            //TODO: Clear Workshift tenders for each added employee, for GetTenderSingle - too
+            var bootstrapper = new Bootstrapper();
+            var container = bootstrapper.Bootstrap();
+            var tenderParser = container.Resolve<TenderParser>();
+            int requestedQuantity = 0;
+            List<TenderRequestEventArgs> args = new List<TenderRequestEventArgs>();
+            foreach(var x in AddedEmployees)
+            {
+                var employeeWorkshift = await _employeeWorkshiftRepository.GetByFk(Workshift.Id, x.Id);
+                var quantity = await _employeeRepository.GetQuantityAsync(x.Id);
+                requestedQuantity += quantity;
+                args.Add(new TenderRequestEventArgs() {
+                    Id = employeeWorkshift.Id, 
+                    Quantity = quantity , 
+                     DateFrom = DateFrom.ToString("yyyy-MM-dd"),
+                     Email = x.Email, 
+                    FileName = x.Name + " " + x.Surname + " " + Workshift.Date.ToShortDateString().Replace('/', '.'),
+                    Type = RequestType.Parse
+                });
+            }
+            if (!tenderParser.IsActive)
+            {
+
+                tenderParser.Show();
+                tenderParser.RequestedQuantity = requestedQuantity;
+                tenderParser.Args = new List<TenderRequestEventArgs>(args);
+            }
         }
 
         private async void OnGetTenderSingleExecute()
@@ -249,16 +275,21 @@ namespace LinkExtractor.UI.ViewModel
             var container = bootstrapper.Bootstrap();
             var tenderParser = container.Resolve<TenderParser>();
             var employeeWorkshift = await _employeeWorkshiftRepository.GetByFk(Workshift.Id, SelectedAddedEmployee.Id);
-            
+            var quantity = await _employeeRepository.GetQuantityAsync(SelectedAddedEmployee.Id);
             if(!tenderParser.IsActive)
             {
                 tenderParser.Show();
-                tenderParser.Args = new TenderRequestEventArgs() { Id = employeeWorkshift.Id, Quantity = 30,
+                tenderParser.RequestedQuantity = quantity;
+                tenderParser.Args = new List<TenderRequestEventArgs>() { new TenderRequestEventArgs{
+                    Id = employeeWorkshift.Id, Quantity = quantity,
                     FileName = SelectedAddedEmployee.Name + " " + SelectedAddedEmployee.Surname + " " + Workshift.Date.ToShortDateString().Replace('/', '.'),
-                    Email = SelectedAddedEmployee.Email, DateFrom = DateFrom.ToString("yyyy-MM-dd")
+                    Email = SelectedAddedEmployee.Email, DateFrom = DateFrom.ToString("yyyy-MM-dd"),
+                    Type = RequestType.Parse}
                 };
                 //EventAggregator.GetEvent<TenderRequestEvent>().Publish(new TenderRequestEventArgs() { Id = employeeWorkshift.Id, Quantity = 30 });
             }
+            //await Task.Delay(6000);
+            //await container.DisposeAsync();
 
         }
 

@@ -2,6 +2,8 @@
 using LinkExtractor.UI.Events;
 using LinkExtractor.UI.ViewModel;
 using Prism.Events;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -13,29 +15,54 @@ namespace LinkExtractor.UI
     public partial class TenderParser : Window
     {
         private ITenderParserViewModel _viewModel;
-        private IEventAggregator _eventAggregator;
-        public TenderRequestEventArgs Args
-        { 
+        //private IEventAggregator _eventAggregator;
+        private int _requestedQuantity;
+        private List<int> _pagesExecuted;
+        public List<TenderRequestEventArgs> Args
+        {
             get
             {
                 return _args;
             }
             set
             {
-                _args = value;
-                StartParse(_args);
+                _args.Clear();
+                foreach (var x in value)
+                {
+                    _args.Add(x);
+                }
+                if (_args[0].Type == RequestType.Parse)
+                    StartParse(_args);
+                else
+                    StartLogin();
+            }
+        }
+        public int RequestedQuantity
+        {
+            get
+            {
+                return _requestedQuantity;
+            }
+            set
+            {
+                _requestedQuantity = value;
             }
         }
 
-        private TenderRequestEventArgs _args;
+
+        private List<TenderRequestEventArgs> _args;
 
         public TenderParser(ITenderParserViewModel viewModel, IEventAggregator eventAggregator)
         {
             InitializeComponent();
             _viewModel = viewModel;
-            _eventAggregator = eventAggregator;
+            _args = new List<TenderRequestEventArgs>();
+            _pagesExecuted = new List<int>();
+            //_eventAggregator = eventAggregator;
             DataContext = _viewModel;
-            _eventAggregator.GetEvent<TenderRequestEvent>().Subscribe(StartParse, true);
+            //_eventAggregator.GetEvent<TenderRequestEvent>().Subscribe(StartParse, true);
+
+            wb.BrowserSettings.ApplicationCache = CefState.Enabled;
 
             wb.FrameLoadEnd += WebBrowserFrameLoadEnded;
             this.Loaded += TenderParser_Loaded;
@@ -48,23 +75,37 @@ namespace LinkExtractor.UI
 
         private async void WebBrowserFrameLoadEnded(object sender, FrameLoadEndEventArgs e)
         {
-                
-             if(e.Frame.IsMain)
+            if (_args[0].Type == RequestType.Parse)
+            {
+                if (e.Frame.IsMain)
                 {
-                await Task.Delay(3000);// - In case it is not loaded
-//                wb.ViewSource();
-                var html = await wb.GetSourceAsync();
-                _viewModel.AddTenders(html);
+                    if (!_pagesExecuted.Contains(_viewModel.GetCurrentPage()))
+                    {                   
+                        await Task.Delay(7000);// - In case it is not loaded
+                        _pagesExecuted.Add(_viewModel.GetCurrentPage());
+                        //wb.ViewSource();
+                        var html = await wb.GetSourceAsync();
+                        await Task.Run(() => _viewModel.AddTenders(html));
+                    }
                 }
+            }
         }
 
-        private void StartParse(TenderRequestEventArgs args)
+        private void StartParse(List<TenderRequestEventArgs> args)
         {
-            _viewModel.StartParse(args);
+            _viewModel.SetupArgs(args, RequestedQuantity);
+            _viewModel.StartParse();
         }
 
         //TODO : Maybe turn this code async or at least multi-thread
 
-
+        private void StartLogin()
+        {
+            this.Width = 1280;
+            this.Height = 720;
+            this.Visibility = Visibility.Visible;
+            this.wb.Visibility = Visibility.Visible;
+            _viewModel.StartLogin();
+        }
     }
 }

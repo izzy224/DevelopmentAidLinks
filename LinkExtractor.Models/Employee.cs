@@ -25,6 +25,7 @@ namespace LinkExtractor.Models
         [Required,MaxLength(320)]
         [ EmailAddress]
         public string Email { get; set; }
+        public int Quantity { get; set; }
         public int? TeamId { get; set; }
         public Team Team { get; set; }
         public ICollection<EmployeeWorkshift> EmployeeWorkshifts { get; set; }

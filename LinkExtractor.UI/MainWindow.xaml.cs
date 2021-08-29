@@ -22,5 +22,6 @@ namespace LinkExtractor.UI
         {
             await _viewModel.LoadAsync();
         }
+        
     }
 }

@@ -18,6 +18,13 @@ namespace LinkExtractor.UI.Events
         public string FileName { get; set; }
         public string Email { get; set; }
         public string DateFrom { get; set; }
+        public RequestType Type { get; set; }
         //Maybe later add filters
+    }
+
+    public enum RequestType
+    {
+        Login = 1,
+        Parse = 2
     }
 }

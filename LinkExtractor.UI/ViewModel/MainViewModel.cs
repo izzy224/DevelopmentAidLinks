@@ -1,9 +1,12 @@
-﻿using Autofac.Features.Indexed;
+﻿using Autofac;
+using Autofac.Features.Indexed;
 using LinkExtractor.UI.Events;
+using LinkExtractor.UI.Startup;
 using LinkExtractor.UI.View.Services;
 using Prism.Commands;
 using Prism.Events;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -31,6 +34,7 @@ namespace LinkExtractor.UI.ViewModel
                 .Subscribe(DetailDeleted);
 
             CreateNewDetailCommand = new DelegateCommand<Type>(OnCreateNewDetailExecute);
+            LoginCommand = new DelegateCommand(OnLoginExecute);
             NavigationViewModel = navigationViewModel;
         }
 
@@ -42,6 +46,7 @@ namespace LinkExtractor.UI.ViewModel
         }
 
         public ICommand CreateNewDetailCommand { get; }
+        public ICommand LoginCommand { get; }
         public INavigationViewModel NavigationViewModel { get; }
         
 
@@ -88,6 +93,25 @@ namespace LinkExtractor.UI.ViewModel
         private void DetailDeleted(DetailDeletedEventArgs args)
         {
             DetailViewModel = null;
+        }
+        private void OnLoginExecute()
+        {
+            var bootstrapper = new Bootstrapper();
+            var container = bootstrapper.Bootstrap();
+            var tenderParser = container.Resolve<TenderParser>();
+
+            if (!tenderParser.IsActive)
+            {
+                tenderParser.Show();
+                tenderParser.Args = new List<TenderRequestEventArgs>()
+                {
+                    new TenderRequestEventArgs()
+                    {
+                    Type = RequestType.Login
+                    }
+                };
+                //EventAggregator.GetEvent<TenderRequestEvent>().Publish(new TenderRequestEventArgs() { Id = employeeWorkshift.Id, Quantity = 30 });
+            }
         }
     }
 }

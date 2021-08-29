@@ -9,5 +9,6 @@ namespace LinkExtractor.UI.DataServices.Repositories
         public Task<bool> HasShiftsAsync(int employeeId);
         public Task<List<int>> GetAllIdAsync();
         Task<List<Employee>> GetAllEmployeesAsync();
+        Task<int> GetQuantityAsync(int id);
     }
 }

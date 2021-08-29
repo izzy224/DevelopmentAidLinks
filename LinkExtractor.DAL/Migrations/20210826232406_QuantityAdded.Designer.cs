@@ -4,14 +4,16 @@ using LinkExtractor.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LinkExtractor.DAL.Migrations
 {
     [DbContext(typeof(LinkExtractorDbContext))]
-    partial class LinkExtractorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210826232406_QuantityAdded")]
+    partial class QuantityAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

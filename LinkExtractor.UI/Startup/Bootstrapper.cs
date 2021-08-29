@@ -22,7 +22,7 @@ namespace LinkExtractor.UI.Startup
             builder.RegisterType<MessageDialogService>().As<IMessageDialogService>();
 
             builder.RegisterType<MainWindow>().AsSelf();
-            builder.RegisterType<TenderParser>().AsSelf();
+            builder.RegisterType<TenderParser>().AsSelf().SingleInstance();
 
             builder.RegisterType<MainViewModel>().AsSelf();
             builder.RegisterType<NavigationViewModel>().As<INavigationViewModel>();
