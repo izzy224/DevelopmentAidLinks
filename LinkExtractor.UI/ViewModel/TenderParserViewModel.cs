@@ -85,7 +85,8 @@ namespace LinkExtractor.UI.ViewModel
                 {
                     LanguageDetector ld = new LanguageDetector();
 
-                    if (!(await _tenderRepository.HasUrlAsync(htmlTender.Attributes["ng-href"].Value)))
+                    if (!(await _tenderRepository.HasUrlAsync(htmlTender.Attributes["ng-href"].Value)) 
+                        && await Task.Run(() => !_urlList.Contains(htmlTender.Attributes["ng-href"].Value)))
                     {
                         if (ld.Detect(htmlTender.InnerText) == "en")
                             _urlList.Add(htmlTender.Attributes["ng-href"].Value);
@@ -157,7 +158,7 @@ namespace LinkExtractor.UI.ViewModel
                 foreach(var url in urlList)
                 {
                     x++;
-                    para.AppendText($"{x}. "+"https://www.developmentaid.org/"+url+"\n\n");
+                    para.AppendText($"{x}.\t "+"https://www.developmentaid.org/"+url+"\n\n");
                 }
                 doc.SaveToFile(@$"D:\DevelopmentAid\{args.FileName}.docx", FileFormat.Docx);
 

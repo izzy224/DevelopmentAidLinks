@@ -109,11 +109,11 @@ namespace LinkExtractor.UI.ViewModel
 
         protected override async void OnDeleteExecute()
         {
-            if (await _employeeRepository.HasShiftsAsync(Employee.Id))
-            {
-                await _messageDialogService.ShowInfoDialogAsync($"{Employee.Name} {Employee.Surname} can't be deleted as he is involved in shifts");
-                return;
-            }
+            //if (await _employeeRepository.HasShiftsAsync(Employee.Id))
+            //{
+            //    await _messageDialogService.ShowInfoDialogAsync($"{Employee.Name} {Employee.Surname} can't be deleted as he is involved in shifts");
+            //    return;
+            //}
 
             var res = await _messageDialogService.ShowOkCancelDialogAsync($"Are you sure you want to delete the employee {Employee.Name} {Employee.Surname}", "Confirmation dialog");
             if (res == MessageDialogResult.Ok)
