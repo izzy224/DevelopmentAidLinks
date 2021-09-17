@@ -10,6 +10,8 @@ using System;
 using LiteMiner.classes;
 using System.Threading.Tasks;
 using LinkExtractor.UI.View.Services;
+using System.Windows;
+using System.Globalization;
 
 namespace LinkExtractor.UI.ViewModel
 {
@@ -26,6 +28,7 @@ namespace LinkExtractor.UI.ViewModel
         private IMessageDialogService _messageDialogService;
         private int _currentPage;
         private List<string> _urlList;
+        private List<string> _deadlines;
         private List<TenderRequestEventArgs> _args;
 
         public TenderParserViewModel(ITenderRepository tenderRepository, IMessageDialogService messageDialogService)
@@ -70,6 +73,7 @@ namespace LinkExtractor.UI.ViewModel
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
 
+                var htmlDates = htmlDoc.DocumentNode.SelectNodes("//*[@class=\"details-container search-card__funding-md-column\"]//div[@class=\"ng-scope\"]//span[@class=\"ng-binding\"]").ToList();
                 var htmlTenders = htmlDoc.DocumentNode.SelectNodes("//*[@class=\"search-card__title ng-binding ng-scope\"]").ToList();
 
 
@@ -81,18 +85,35 @@ namespace LinkExtractor.UI.ViewModel
                 }
 
 
-                foreach (var htmlTender in htmlTenders)
+                //foreach (var htmlTender in htmlTenders)
+                //{
+                //    LanguageDetector ld = new LanguageDetector();
+
+                //    if (!(await _tenderRepository.HasUrlAsync(htmlTender.Attributes["ng-href"].Value))
+                //        && await Task.Run(() => !_urlList.Contains(htmlTender.Attributes["ng-href"].Value)))
+                //    {
+                //        if (ld.Detect(htmlTender.InnerText) == "en")
+                //        {
+                //            _urlList.Add(htmlTender.Attributes["ng-href"].Value);
+                //        }
+                //    }
+                //}
+                for (int i = 0; i < htmlTenders.Count; i++)
                 {
                     LanguageDetector ld = new LanguageDetector();
 
-                    if (!(await _tenderRepository.HasUrlAsync(htmlTender.Attributes["ng-href"].Value)) 
-                        && await Task.Run(() => !_urlList.Contains(htmlTender.Attributes["ng-href"].Value)))
+                    if (!(await _tenderRepository.HasUrlAsync(htmlTenders[i].Attributes["ng-href"].Value))
+                        && await Task.Run(() => !_urlList.Contains(htmlTenders[i].Attributes["ng-href"].Value)))
                     {
-                        if (ld.Detect(htmlTender.InnerText) == "en")
-                            _urlList.Add(htmlTender.Attributes["ng-href"].Value);
+                        DateTime dDate = DateTime.ParseExact(htmlDates[i].InnerText, "MMM d, yyyy", CultureInfo.InvariantCulture);
+                        if (ld.Detect(htmlTenders[i].InnerText) == "en" && (dDate - DateTime.Now).Days > 5)
+                        {
+                            _urlList.Add(htmlTenders[i].Attributes["ng-href"].Value);
+                        }
                     }
                 }
-                if (_urlList.Count < _requestedQuantity)
+
+                    if (_urlList.Count < _requestedQuantity)
                 {
                     _currentPage++;
                     StartParse();
@@ -140,9 +161,9 @@ namespace LinkExtractor.UI.ViewModel
 
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                await _messageDialogService.ShowInfoDialogAsync("An error happened, contact Vasea:\n" + e);
+                MessageBox.Show(e.Message);
             }
         }
 
